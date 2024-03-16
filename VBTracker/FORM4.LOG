@@ -1,0 +1,8 @@
+Line 78: Class CCRProgressBar.ccrpProgressBar of control ccrpProgressBar1 was not a loaded control class.
+Line 85: The property name _ExtentX in ccrpProgressBar1 is invalid.
+Line 86: The property name _ExtentY in ccrpProgressBar1 is invalid.
+Line 87: The property name AutoCaption in ccrpProgressBar1 is invalid.
+Line 89: The property name Caption in ccrpProgressBar1 is invalid.
+Line 101: The property name IncrementSize in ccrpProgressBar1 is invalid.
+Line 102: The property name Max in ccrpProgressBar1 is invalid.
+Line 103: The property name Smooth in ccrpProgressBar1 is invalid.

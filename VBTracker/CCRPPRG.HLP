@@ -1,0 +1,2580 @@
+FullAccess'
+
+IF ( NOT EXISTS ( SELECT name
+                  FROM sysusers
+                  WHERE issqlrole = 1
+                  AND name = N'aspnet_Membership_BasicAccess'  ) )
+EXEC sp_addrole N'aspnet_Membership_BasicAccess'
+
+IF ( NOT EXISTS ( SELECT name
+                  FROM sysusers
+                  WHERE issqlrole = 1
+                  AND name = N'aspnet_Membership_ReportingAccess'  ) )
+EXEC sp_addrole N'aspnet_Membership_ReportingAccess'
+GO
+
+EXEC sp_addrolemember N'aspnet_Membership_BasicAccess', N'aspnet_Membership_FullAccess'
+EXEC sp_addrolemember N'aspnet_Membership_ReportingAccess', N'aspnet_Membership_FullAccess'
+GO
+
+--
+--Stored Procedure rights for BasicAcess
+--
+GRANT EXECUTE ON dbo.aspnet_Membership_GetUserByUserId TO aspnet_Membership_BasicAccess
+GRANT EXECUTE ON dbo.aspnet_Membership_GetUserByName TO aspnet_Membership_BasicAccess
+GRANT EXECUTE ON dbo.aspnet_Membership_GetUserByEmail TO aspnet_Membership_BasicAccess
+GRANT EXECUTE ON dbo.aspnet_Membership_GetPassword TO aspnet_Membership_BasicAccess
+GRANT EXECUTE ON dbo.aspnet_Membership_GetPasswordWithFormat TO aspnet_Membership_BasicAccess
+GRANT EXECUTE ON dbo.aspnet_Membership_UpdateUserInfo TO aspnet_Membership_BasicAccess
+GRANT EXECUTE ON dbo.aspnet_Membership_GetNumberOfUsersOnline TO aspnet_Membership_BasicAccess
+GRANT EXECUTE ON dbo.aspnet_CheckSchemaVersion TO aspnet_Membership_BasicAccess
+GRANT EXECUTE ON dbo.aspnet_RegisterSchemaVersion TO aspnet_Membership_BasicAccess
+GRANT EXECUTE ON dbo.aspnet_UnRegisterSchemaVersion TO aspnet_Membership_BasicAccess
+
+--
+--Stored Procedure rights for ReportingAccess
+--
+GRANT EXECUTE ON dbo.aspnet_Membership_GetUserByUserId TO aspnet_Membership_ReportingAccess
+GRANT EXECUTE ON dbo.aspnet_Membership_GetUserByName TO aspnet_Membership_ReportingAccess
+GRANT EXECUTE ON dbo.aspnet_Membership_GetUserByEmail TO aspnet_Membership_ReportingAccess
+GRANT EXECUTE ON dbo.aspnet_Membership_GetAllUsers TO aspnet_Membership_ReportingAccess
+GRANT EXECUTE ON dbo.aspnet_Membership_GetNumberOfUsersOnline TO aspnet_Membership_ReportingAccess
+GRANT EXECUTE ON dbo.aspnet_Membership_FindUsersByName TO aspnet_Membership_ReportingAccess
+GRANT EXECUTE ON dbo.aspnet_Membership_FindUsersByEmail TO aspnet_Membership_ReportingAccess
+GRANT EXECUTE ON dbo.aspnet_CheckSchemaVersion TO aspnet_Membership_ReportingAccess
+GRANT EXECUTE ON dbo.aspnet_RegisterSchemaVersion TO aspnet_Membership_ReportingAccess
+GRANT EXECUTE ON dbo.aspnet_UnRegisterSchemaVersion TO aspnet_Membership_ReportingAccess
+
+--
+--Additional stored procedure rights for FullAccess
+--
+GRANT EXECUTE ON dbo.aspnet_Users_DeleteUser TO aspnet_Membership_FullAccess
+
+GRANT EXECUTE ON dbo.aspnet_Membership_CreateUser TO aspnet_Membership_FullAccess
+GRANT EXECUTE ON dbo.aspnet_Membership_SetPassword TO aspnet_Membership_FullAccess
+GRANT EXECUTE ON dbo.aspnet_Membership_ResetPassword TO aspnet_Membership_FullAccess
+GRANT EXECUTE ON dbo.aspnet_Membership_UpdateUser TO aspnet_Membership_FullAccess
+GRANT EXECUTE ON dbo.aspnet_Membership_ChangePasswordQuestionAndAnswer TO aspnet_Membership_FullAccess
+GRANT EXECUTE ON dbo.aspnet_Membership_UnlockUser TO aspnet_Membership_FullAccess
+
+--
+--View rights
+--
+GRANT SELECT ON dbo.vw_aspnet_Applications TO aspnet_Membership_ReportingAccess
+GRANT SELECT ON dbo.vw_aspnet_Users TO aspnet_Membership_ReportingAccess
+
+GRANT SELECT ON dbo.vw_aspnet_MembershipUsers TO aspnet_Membership_ReportingAccess
+
+/*************************************************************/
+/*************************************************************/
+/*************************************************************/
+/*************************************************************/
+
+DECLARE @command nvarchar(4000)
+SET @command = 'REVOKE EXECUTE ON [dbo].aspnet_RegisterSchemaVersion FROM ' + QUOTENAME(user)
+EXECUTE (@command)
+GO
+
+PRINT '--------------------------------------------'
+PRINT 'Completed execution of InstallMembership.SQL'
+PRINT '--------------------------------------------'
+/**********************************************************************/
+/* UninstallMembership.SQL                                            */
+/*                                                                    */
+/* Uninstalls the tables, triggers and stored procedures necessary for*/
+/* supporting the aspnet feature of ASP.Net                           */
+/*
+** Copyright Microsoft, Inc. 2002
+** All Rights Reserved.
+*/
+/**********************************************************************/
+
+PRINT '---------------------------------------------'
+PRINT 'Starting execution of UninstallMembership.SQL'
+PRINT '---------------------------------------------'
+GO
+
+SET QUOTED_IDENTIFIER OFF -- We don't use quoted identifiers
+SET ANSI_NULLS ON         -- We don't want (NULL = NULL) == TRUE
+GO
+SET ANSI_PADDING ON
+GO
+
+USE [aspnetdb]
+
+DECLARE @command nvarchar(4000)
+DECLARE @RemoveAllRoleMembersExits bit
+SET @RemoveAllRoleMembersExits = 0
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_UnRegisterSchemaVersion]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+BEGIN
+	SET @command = 'GRANT EXECUTE ON [dbo].aspnet_UnRegisterSchemaVersion TO ' + QUOTENAME(user)
+	EXEC (@command)
+END
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Setup_RemoveAllRoleMembers]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+BEGIN
+    SET @RemoveAllRoleMembersExits = 1
+    SET @command = 'GRANT EXECUTE ON [dbo].aspnet_Setup_RemoveAllRoleMembers TO ' + QUOTENAME(user)
+    EXEC (@command)
+END
+
+IF EXISTS ( SELECT * FROM sysusers WHERE issqlrole = 1 AND name = N'aspnet_Membership_FullAccess'  )
+BEGIN
+  IF (@RemoveAllRoleMembersExits = 1)
+     EXEC [dbo].[aspnet_Setup_RemoveAllRoleMembers] N'aspnet_Membership_FullAccess'
+  EXEC sp_droprole N'aspnet_Membership_FullAccess'
+END
+
+IF EXISTS ( SELECT * FROM sysusers WHERE issqlrole = 1 AND name = N'aspnet_Membership_BasicAccess'  )
+BEGIN
+  IF (@RemoveAllRoleMembersExits = 1)
+     EXEC [dbo].[aspnet_Setup_RemoveAllRoleMembers] N'aspnet_Membership_BasicAccess'
+  EXEC sp_droprole N'aspnet_Membership_BasicAccess'
+END
+
+IF EXISTS ( SELECT * FROM sysusers WHERE issqlrole = 1 AND name = N'aspnet_Membership_ReportingAccess'  )
+BEGIN
+  IF (@RemoveAllRoleMembersExits = 1)
+     EXEC [dbo].[aspnet_Setup_RemoveAllRoleMembers] N'aspnet_Membership_ReportingAccess'
+  EXEC sp_droprole N'aspnet_Membership_ReportingAccess'
+END
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Membership_CreateUser]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[aspnet_Membership_CreateUser]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Membership_GetUserByName]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[aspnet_Membership_GetUserByName]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Membership_GetUserByEmail]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[aspnet_Membership_GetUserByEmail]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Membership_GetPassword]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[aspnet_Membership_GetPassword]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Membership_GetPasswordWithFormat]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[aspnet_Membership_GetPasswordWithFormat]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Membership_UpdateUserInfo]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[aspnet_Membership_UpdateUserInfo]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Membership_SetPassword]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[aspnet_Membership_SetPassword]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Membership_ResetPassword]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[aspnet_Membership_ResetPassword]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Membership_UpdateUser]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[aspnet_Membership_UpdateUser]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Membership_ChangePasswordQuestionAndAnswer]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[aspnet_Membership_ChangePasswordQuestionAndAnswer]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Membership_GetAllUsers]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[aspnet_Membership_GetAllUsers]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Membership_GetNumberOfUsersOnline]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[aspnet_Membership_GetNumberOfUsersOnline]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Membership_FindUsersByName]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[aspnet_Membership_FindUsersByName]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Membership_FindUsersByEmail]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[aspnet_Membership_FindUsersByEmail]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Membership_GetUserByUserId]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[aspnet_Membership_GetUserByUserId]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Membership_UnlockUser]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+DROP PROCEDURE [dbo].[aspnet_Membership_UnlockUser]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_Membership]') AND OBJECTPROPERTY(id, N'IsUserTable') = 1)
+DROP TABLE [dbo].[aspnet_Membership]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[vw_aspnet_MembershipUsers]') AND OBJECTPROPERTY(id, N'IsView') = 1)
+DROP VIEW [dbo].[vw_aspnet_MembershipUsers]
+
+IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = object_id(N'[dbo].[aspnet_UnRegisterSchemaVersion]') AND OBJECTPROPERTY(id, N'IsProcedure') = 1)
+BEGIN
+    EXEC [dbo].aspnet_UnRegisterSchemaVersion N'Membership', N'1'
+    SET @command = 'REVOKE EXECUTE ON [dbo].aspnet_UnRegisterSchemaVersion FROM ' + QUOTENAME(user)
+    EXEC (@command)
+END
+IF (@RemoveAllRoleMembersExits = 1)
+BEGIN
+    SET @command = 'REVOKE EXECUTE ON [dbo].aspnet_Setup_RemoveAllRoleMembers FROM ' + QUOTENAME(user)
+    EXEC (@command)
+END
+
+PRINT '----------------------------------------------'
+PRINT 'Completed execution of UninstallMembership.SQL'
+PRINT '----------------------------------------------'
+/*********************************************************************
+  InstallPersistSqlState.SQL                                                
+                                                                    
+  Installs the tables, and stored procedures necessary for           
+  supporting ASP.NET session state.                                  
+
+  Copyright Microsoft, Inc.
+  All Rights Reserved.
+
+ *********************************************************************/
+
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON 
+GO
+
+PRINT ''
+PRINT '------------------------------------------------'
+PRINT 'Starting execution of InstallPersistSqlState.SQL'
+PRINT '------------------------------------------------'
+PRINT ''
+PRINT '--------------------------------------------------'
+PRINT 'Note:                                             '
+PRINT 'This file is included for backward compatibility  '
+PRINT 'only.  You should use aspnet_regsql.exe to install'
+PRINT 'and uninstall SQL session state.                  '
+PRINT ''
+PRINT 'Run ''aspnet_regsql.exe -?'' for details.         '
+PRINT '--------------------------------------------------'
+GO
+
+/*****************************************************************************/
+
+USE master
+GO
+
+/* Create and populate the session state database */
+
+IF DB_ID(N'ASPState') IS NULL BEGIN
+    DECLARE @cmd nvarchar(500)
+    SET @cmd = N'CREATE DATABASE [ASPState]'
+    EXEC(@cmd)
+END    
+GO
+
+/* Drop all tables, startup procedures, stored procedures and types. */
+
+/* Drop the DeleteExpiredSessions_Job */
+
+DECLARE @jobname nvarchar(200)
+SET @jobname = N'ASPState' + '_Job_DeleteExpiredSessions' 
+
+-- Delete the [local] job 
+-- We expected to get an error if the job doesn't exist.
+PRINT 'If the job does not exist, an error from msdb.dbo.sp_delete_job is expected.'
+EXECUTE msdb.dbo.sp_delete_job @job_name = @jobname
+GO
+
+DECLARE @sstype nvarchar(128)
+SET @sstype = N'sstype_persisted'
+
+IF UPPER(@sstype) = 'SSTYPE_TEMP' AND OBJECT_ID(N'dbo.ASPState_Startup', 'P') IS NOT NULL BEGIN
+    DROP PROCEDURE dbo.ASPState_Startup
+END    
+
+USE [ASPState]
+GO
+
+IF OBJECT_ID(N'dbo.ASPStateTempSessions','U') IS NOT NULL BEGIN
+    DROP TABLE dbo.ASPStateTempSessions
+END
+
+IF OBJECT_ID(N'dbo.ASPStateTempApplications','U') IS NOT NULL BEGIN
+    DROP TABLE dbo.ASPStateTempApplications
+END
+
+USE [ASPState]
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'GetMajorVersion') AND (type = 'P')))
+    DROP PROCEDURE [dbo].GetMajorVersion
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'CreateTempTables') AND (type = 'P')))
+    DROP PROCEDURE [dbo].CreateTempTables
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempGetVersion') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempGetVersion
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'GetHashCode') AND (type = 'P')))
+    DROP PROCEDURE [dbo].GetHashCode
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempGetAppID') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempGetAppID
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempGetStateItem') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempGetStateItem
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempGetStateItem2') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempGetStateItem2
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempGetStateItem3') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempGetStateItem3
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempGetStateItemExclusive') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempGetStateItemExclusive
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempGetStateItemExclusive2') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempGetStateItemExclusive2
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempGetStateItemExclusive3') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempGetStateItemExclusive3
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempReleaseStateItemExclusive') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempReleaseStateItemExclusive
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempInsertUninitializedItem') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempInsertUninitializedItem
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempInsertStateItemShort') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempInsertStateItemShort
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempInsertStateItemLong') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempInsertStateItemLong
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempUpdateStateItemShort') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempUpdateStateItemShort
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempUpdateStateItemShortNullLong') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempUpdateStateItemShortNullLong
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempUpdateStateItemLong') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempUpdateStateItemLong
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempUpdateStateItemLongNullShort') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempUpdateStateItemLongNullShort
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempRemoveStateItem') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempRemoveStateItem
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'TempResetTimeout') AND (type = 'P')))
+    DROP PROCEDURE [dbo].TempResetTimeout
+GO
+
+IF (EXISTS (SELECT name FROM sysobjects WHERE (name = N'DeleteExpiredSessions') AND (type = 'P')))
+    DROP PROCEDURE [dbo].DeleteExpiredSessions
+GO
+
+IF EXISTS(SELECT name FROM systypes WHERE name ='tSessionId')
+    EXECUTE sp_droptype tSessionId
+GO
+
+IF EXISTS(SELECT name FROM systypes WHERE name ='tAppName')
+    EXECUTE sp_droptype tAppName
+GO
+
+IF EXISTS(SELECT name FROM systypes WHERE name ='tSessionItemShort')
+    EXECUTE sp_droptype tSessionItemShort
+GO
+
+IF EXISTS(SELECT name FROM systypes WHERE name ='tSessionItemLong')
+    EXECUTE sp_droptype tSessionItemLong
+GO
+
+IF EXISTS(SELECT name FROM systypes WHERE name ='tTextPtr')
+    EXECUTE sp_droptype tTextPtr
+GO
+
+/*****************************************************************************/
+
+CREATE PROCEDURE dbo.GetMajorVersion
+    @@ver int OUTPUT
+AS
+BEGIN
+	DECLARE @version        nchar(100)
+	DECLARE @dot            iZŠ}‰ € €nt
+	DECLARE @hyphen         int
+	DECLARE @SqlToExec      nchar(4000)
+
+	SELECT @@ver = 7
+	SELECT @version = @@Version
+	SELECT @hyphen  = CHARINDEX(N' - ', @version)
+	IF (NOT(@hyphen IS NULL) AND @hyphen > 0)
+	BEGIN
+		SELECT @hyphen = @hyphen + 3
+		SELECT @dot    = CHARINDEX(N'.', @version, @hyphen)
+		IF (NOT(@dot IS NULL) AND @dot > @hyphen)
+		BEGIN
+			SELECT @version = SUBSTRING(@version, @hyphen, @dot - @hyphen)
+			SELECT @@ver     = CONVERT(int, @version)
+		END
+	END
+END
+GO   
+
+/*****************************************************************************/
+
+USE [ASPState]
+
+/* Find out the version */
+DECLARE @ver int
+EXEC dbo.GetMajorVersion @@ver=@ver OUTPUT
+
+DECLARE @cmd nchar(4000)
+
+IF (@ver >= 8)
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.CreateTempTables
+        AS
+            CREATE TABLE [ASPState].dbo.ASPStateTempSessions (
+                SessionId           nvarchar(88)    NOT NULL PRIMARY KEY,
+                Created             datetime        NOT NULL DEFAULT GETUTCDATE(),
+                Expires             datetime        NOT NULL,
+                LockDate            datetime        NOT NULL,
+                LockDateLocal       datetime        NOT NULL,
+                LockCookie          int             NOT NULL,
+                Timeout             int             NOT NULL,
+                Locked              bit             NOT NULL,
+                SessionItemShort    varbinary(7000) NULL,
+                SessionItemLong     image           NULL,
+                Flags               int             NOT NULL DEFAULT 0,
+            ) 
+
+            CREATE NONCLUSTERED INDEX Index_Expires ON [ASPState].dbo.ASPStateTempSessions(Expires)
+
+            CREATE TABLE [ASPState].dbo.ASPStateTempApplications (
+                AppId               int             NOT NULL PRIMARY KEY,
+                AppName             char(280)       NOT NULL,
+            ) 
+
+            CREATE NONCLUSTERED INDEX Index_AppName ON [ASPState].dbo.ASPStateTempApplications(AppName)
+
+            RETURN 0'
+ELSE
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.CreateTempTables
+        AS
+            CREATE TABLE [ASPState].dbo.ASPStateTempSessions (
+                SessionId           nvarchar(88)    NOT NULL PRIMARY KEY,
+                Created             datetime        NOT NULL DEFAULT GETDATE(),
+                Expires             datetime        NOT NULL,
+                LockDate            datetime        NOT NULL,
+                LockCookie          int             NOT NULL,
+                Timeout             int             NOT NULL,
+                Locked              bit             NOT NULL,
+                SessionItemShort    VARBINARY(7000) NULL,
+                SessionItemLong     IMAGE           NULL,
+                Flags               int             NOT NULL DEFAULT 0,
+            ) 
+
+            CREATE NONCLUSTERED INDEX Index_Expires ON [ASPState].dbo.ASPStateTempSessions(Expires)
+
+            CREATE TABLE [ASPState].dbo.ASPStateTempApplications (
+                AppId               int             NOT NULL PRIMARY KEY,
+                AppName             char(280)       NOT NULL,
+            ) 
+
+            CREATE NONCLUSTERED INDEX Index_AppName ON [ASPState].dbo.ASPStateTempApplications(AppName)
+
+            RETURN 0'
+
+EXEC (@cmd)
+GO   
+
+/*****************************************************************************/
+
+EXECUTE sp_addtype tSessionId, 'nvarchar(88)',  'NOT NULL'
+GO
+
+EXECUTE sp_addtype tAppName, 'varchar(280)', 'NOT NULL'
+GO
+
+EXECUTE sp_addtype tSessionItemShort, 'varbinary(7000)'
+GO
+
+EXECUTE sp_addtype tSessionItemLong, 'image'
+GO
+
+EXECUTE sp_addtype tTextPtr, 'varbinary(16)'
+GO
+
+/*****************************************************************************/
+
+CREATE PROCEDURE dbo.TempGetVersion
+    @ver      char(10) OUTPUT
+AS
+    SELECT @ver = "2"
+    RETURN 0
+GO
+
+/*****************************************************************************/
+
+CREATE PROCEDURE dbo.GetHashCode
+    @input tAppName,
+    @hash int OUTPUT
+AS
+    /* 
+       This sproc is based on this C# hash function:
+
+        int GetHashCode(string s)
+        {
+            int     hash = 5381;
+            int     len = s.Length;
+
+            for (int i = 0; i < len; i++) {
+                int     c = Convert.ToInt32(s[i]);
+                hash = ((hash << 5) + hash) ^ c;
+            }
+
+            return hash;
+        }
+
+        However, SQL 7 doesn't provide a 32-bit integer
+        type that allows rollover of bits, we have to
+        divide our 32bit integer into the upper and lower
+        16 bits to do our calculation.
+    */
+       
+    DECLARE @hi_16bit   int
+    DECLARE @lo_16bit   int
+    DECLARE @hi_t       int
+    DECLARE @lo_t       int
+    DECLARE @len        int
+    DECLARE @i          int
+    DECLARE @c          int
+    DECLARE @carry      int
+
+    SET @hi_16bit = 0
+    SET @lo_16bit = 5381
+    
+    SET @len = DATALENGTH(@input)
+    SET @i = 1
+    
+    WHILE (@i <= @len)
+    BEGIN
+        SET @c = ASCII(SUBSTRING(@input, @i, 1))
+
+        /* Formula:                        
+           hash = ((hash << 5) + hash) ^ c */
+
+        /* hash << 5 */
+        SET @hi_t = @hi_16bit * 32 /* high 16bits << 5 */
+        SET @hi_t = @hi_t & 0xFFFF /* zero out overflow */
+        
+        SET @lo_t = @lo_16bit * 32 /* low 16bits << 5 */
+        
+        SET @carry = @lo_16bit & 0x1F0000 /* move low 16bits carryover to hi 16bits */
+        SET @carry = @carry / 0x10000 /* >> 16 */
+        SET @hi_t = @hi_t + @carry
+        SET @hi_t = @hi_t & 0xFFFF /* zero out overflow */
+
+        /* + hash */
+        SET @lo_16bit = @lo_16bit + @lo_t
+        SET @hi_16bit = @hi_16bit + @hi_t + (@lo_16bit / 0x10000)
+        /* delay clearing the overflow */
+
+        /* ^c */
+        SET @lo_16bit = @lo_16bit ^ @c
+
+        /* Now clear the overflow bits */	
+        SET @hi_16bit = @hi_16bit & 0xFFFF
+        SET @lo_16bit = @lo_16bit & 0xFFFF
+
+        SET @i = @i + 1
+    END
+
+    /* Do a sign extension of the hi-16bit if needed */
+    IF (@hi_16bit & 0x8000 <> 0)
+        SET @hi_16bit = 0xFFFF0000 | @hi_16bit
+
+    /* Merge hi and lo 16bit back together */
+    SET @hi_16bit = @hi_16bit * 0x10000 /* << 16 */
+    SET @hash = @hi_16bit | @lo_16bit
+
+    RETURN 0
+GO
+
+/*****************************************************************************/
+
+DECLARE @cmd nchar(4000)
+
+SET @cmd = N'
+    CREATE PROCEDURE dbo.TempGetAppID
+    @appName    tAppName,
+    @appId      int OUTPUT
+    AS
+    SET @appName = LOWER(@appName)
+    SET @appId = NULL
+
+    SELECT @appId = AppId
+    FROM [ASPState].dbo.ASPStateTempApplications
+    WHERE AppName = @appName
+
+    IF @appId IS NULL BEGIN
+        BEGIN TRAN        
+
+        SELECT @appId = AppId
+        FROM [ASPState].dbo.ASPStateTempApplications WITH (TABLOCKX)
+        WHERE AppName = @appName
+        
+        IF @appId IS NULL
+        BEGIN
+            EXEC GetHashCode @appName, @appId OUTPUT
+            
+            INSERT [ASPState].dbo.ASPStateTempApplications
+            VALUES
+            (@appId, @appName)
+            
+            IF @@ERROR = 2627 
+            BEGIN
+                DECLARE @dupApp tAppName
+            
+                SELECT @dupApp = RTRIM(AppName)
+                FROM [ASPState].dbo.ASPStateTempApplications 
+                WHERE AppId = @appId
+                
+                RAISERROR(''SQL session state fatal error: hash-code collision between applications ''''%s'''' and ''''%s''''. Please rename the 1st application to resolve the problem.'', 
+                            18, 1, @appName, @dupApp)
+            END
+        END
+
+        COMMIT
+    END
+
+    RETURN 0'
+EXEC(@cmd)    
+GO
+
+/*****************************************************************************/
+
+/* Find out the version */
+
+DECLARE @ver int
+EXEC dbo.GetMajorVersion @@ver=@ver OUTPUT
+DECLARE @cmd nchar(4000)
+IF (@ver >= 8)
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempGetStateItem
+            @id         tSessionId,
+            @itemShort  tSessionItemShort OUTPUT,
+            @locked     bit OUTPUT,
+            @lockDate   datetime OUTPUT,
+            @lockCookie int OUTPUT
+        AS
+            DECLARE @textptr AS tTextPtr
+            DECLARE @length AS int
+            DECLARE @now AS datetime
+            SET @now = GETUTCDATE()
+
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, Timeout, @now), 
+                @locked = Locked,
+                @lockDate = LockDateLocal,
+                @lockCookie = LockCookie,
+                @itemShort = CASE @locked
+                    WHEN 0 THEN SessionItemShort
+                    ELSE NULL
+                    END,
+                @textptr = CASE @locked
+                    WHEN 0 THEN TEXTPTR(SessionItemLong)
+                    ELSE NULL
+                    END,
+                @length = CASE @locked
+                    WHEN 0 THEN DATALENGTH(SessionItemLong)
+                    ELSE NULL
+                    END
+            WHERE SessionId = @id
+            IF @length IS NOT NULL BEGIN
+                READTEXT [ASPState].dbo.ASPStateTempSessions.SessionItemLong @textptr 0 @length
+            END
+
+            RETURN 0'
+ELSE
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempGetStateItem
+            @id         tSessionId,
+            @itemShort  tSessionItemShort OUTPUT,
+            @locked     bit OUTPUT,
+            @lockDate   datetime OUTPUT,
+            @lockCookie int OUTPUT
+        AS
+            DECLARE @textptr AS tTextPtr
+            DECLARE @length AS int
+            DECLARE @now AS datetime
+            SET @now = GETDATE()
+
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, Timeout, @now), 
+                @locked = Locked,
+                @lockDate = LockDate,
+                @lockCookie = LockCookie,
+                @itemShort = CASE @locked
+                    WHEN 0 THEN SessionItemShort
+                    ELSE NULL
+                    END,
+                @textptr = CASE @locked
+                    WHEN 0 THEN TEXTPTR(SessionItemLong)
+                    ELSE NULL
+                    END,
+                @length = CASE @locked
+                    WHEN 0 THEN DATALENGTH(SessionItemLong)
+                    ELSE NULL
+                    END
+            WHERE SessionId = @id
+            IF @length IS NOT NULL BEGIN
+                READTEXT [ASPState].dbo.ASPStateTempSessions.SessionItemLong @textptr 0 @length
+            END
+
+            RETURN 0'
+    
+EXEC (@cmd)    
+GO
+
+/*****************************************************************************/
+
+DECLARE @ver int
+EXEC dbo.GetMajorVersion @@ver=@ver OUTPUT
+DECLARE @cmd nchar(4000)
+IF (@ver >= 8)
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempGetStateItem2
+            @id         tSessionId,
+            @itemShort  tSessionItemShort OUTPUT,
+            @locked     bit OUTPUT,
+            @lockAge    int OUTPUT,
+            @lockCookie int OUTPUT
+        AS
+            DECLARE @textptr AS tTextPtr
+            DECLARE @length AS int
+            DECLARE @now AS datetime
+            SET @now = GETUTCDATE()
+
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, Timeout, @now), 
+                @locked = Locked,
+                @lockAge = DATEDIFF(second, LockDate, @now),
+                @lockCookie = LockCookie,
+                @itemShort = CASE @locked
+                    WHEN 0 THEN SessionItemShort
+                    ELSE NULL
+                    END,
+                @textptr = CASE @locked
+                    WHEN 0 THEN TEXTPTR(SessionItemLong)
+                    ELSE NULL
+                    END,
+                @length = CASE @locked
+                    WHEN 0 THEN DATALENGTH(SessionItemLong)
+                    ELSE NULL
+                    END
+            WHERE SessionId = @id
+            IF @length IS NOT NULL BEGIN
+                READTEXT [ASPState].dbo.ASPStateTempSessions.SessionItemLong @textptr 0 @length
+            END
+
+            RETURN 0'
+
+EXEC (@cmd)    
+GO
+            
+
+/*****************************************************************************/
+
+/* Find out the version */
+
+DECLARE @ver int
+EXEC dbo.GetMajorVersion @@ver=@ver OUTPUT
+DECLARE @cmd nchar(4000)
+IF (@ver >= 8)
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempGetStateItem3
+            @id         tSessionId,
+            @itemShort  tSessionItemShort OUTPUT,
+            @locked     bit OUTPUT,
+            @lockAge    int OUTPUT,
+            @lockCookie int OUTPUT,
+            @actionFlags int OUTPUT
+        AS
+            DECLARE @textptr AS tTextPtr
+            DECLARE @length AS int
+            DECLARE @now AS datetime
+            SET @now = GETUTCDATE()
+
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, Timeout, @now), 
+                @locked = Locked,
+                @lockAge = DATEDIFF(second, LockDate, @now),
+                @lockCookie = LockCookie,
+                @itemShort = CASE @locked
+                    WHEN 0 THEN SessionItemShort
+                    ELSE NULL
+                    END,
+                @textptr = CASE @locked
+                    WHEN 0 THEN TEXTPTR(SessionItemLong)
+                    ELSE NULL
+                    END,
+                @length = CASE @locked
+                    WHEN 0 THEN DATALENGTH(SessionItemLong)
+                    ELSE NULL
+                    END,
+
+                /* If the Uninitialized flag (0x1) if it is set,
+                   remove it and return InitializeItem (0x1) in actionFlags */
+                Flags = CASE
+                    WHEN (Flags & 1) <> 0 THEN (Flags & ~1)
+                    ELSE Flags
+                    END,
+                @actionFlags = CASE
+                    WHEN (Flags & 1) <> 0 THEN 1
+                    ELSE 0
+                    END
+            WHERE SessionId = @id
+            IF @length IS NOT NULL BEGIN
+                READTEXT [ASPState].dbo.ASPStateTempSessions.SessionItemLong @textptr 0 @length
+            END
+
+            RETURN 0'
+ELSE
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempGetStateItem3
+            @id         tSessionId,
+            @itemShort  tSessionItemShort OUTPUT,
+            @locked     bit OUTPUT,
+            @lockDate   datetime OUTPUT,
+            @lockCookie int OUTPUT,
+            @actionFlags int OUTPUT
+        AS
+            DECLARE @textptr AS tTextPtr
+            DECLARE @length AS int
+            DECLARE @now AS datetime
+            SET @now = GETDATE()
+
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, Timeout, @now), 
+                @locked = Locked,
+                @lockDate = LockDate,
+                @lockCookie = LockCookie,
+                @itemShort = CASE @locked
+                    WHEN 0 THEN SessionItemShort
+                    ELSE NULL
+                    END,
+                @textptr = CASE @locked
+                    WHEN 0 THEN TEXTPTR(SessionItemLong)
+                    ELSE NULL
+                    END,
+                @length = CASE @locked
+                    WHEN 0 THEN DATALENGTH(SessionItemLong)
+                    ELSE NULL
+                    END,
+
+                /* If the Uninitialized flag (0x1) if it is set,
+                   remove it and return InitializeItem (0x1) in actionFlags */
+                Flags = CASE
+                    WHEN (Flags & 1) <> 0 THEN (Flags & ~1)
+                    ELSE Flags
+                    END,
+                @actionFlags = CASE
+                    WHEN (Flags & 1) <> 0 THEN 1
+                    ELSE 0
+                    END
+            WHERE SessionId = @id
+            IF @length IS NOT NULL BEGIN
+                READTEXT [ASPState].dbo.ASPStateTempSessions.SessionItemLong @textptr 0 @length
+            END
+
+            RETURN 0'
+    
+EXEC (@cmd)    
+GO
+
+/*****************************************************************************/
+
+DECLARE @ver int
+EXEC dbo.GetMajorVersion @@ver=@ver OUTPUT
+DECLARE @cmd nchar(4000)
+IF (@ver >= 8)
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempGetStateItemExclusive
+            @id         tSessionId,
+            @itemShort  tSessionItemShort OUTPUT,
+            @locked     bit OUTPUT,
+            @lockDate   datetime OUTPUT,
+            @lockCookie int OUTPUT
+        AS
+            DECLARE @textptr AS tTextPtr
+            DECLARE @length AS int
+            DECLARE @now AS datetime
+            DECLARE @nowLocal AS datetime
+
+            SET @now = GETUTCDATE()
+            SET @nowLocal = GETDATE()
+            
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, Timeout, @now), 
+                LockDate = CASE Locked
+                    WHEN 0 THEN @now
+                    ELSE LockDate
+                    END,
+                @lockDate = LockDateLocal = CASE Locked
+                    WHEN 0 THEN @nowLocal
+                    ELSE LockDateLocal
+                    END,
+                @lockCookie = LockCookie = CASE Locked
+                    WHEN 0 THEN LockCookie + 1
+                    ELSE LockCookie
+                    END,
+                @itemShort = CASE Locked
+                    WHEN 0 THEN SessionItemShort
+                    ELSE NULL
+                    END,
+                @textptr = CASE Locked
+                    WHEN 0 THEN TEXTPTR(SessionItemLong)
+                    ELSE NULL
+                    END,
+                @length = CASE Locked
+                    WHEN 0 THEN DATALENGTH(SessionItemLong)
+                    ELSE NULL
+                    END,
+                @locked = Locked,
+                Locked = 1
+            WHERE SessionId = @id
+            IF @length IS NOT NULL BEGIN
+                READTEXT [ASPState].dbo.ASPStateTempSessions.SessionItemLong @textptr 0 @length
+            END
+
+            RETURN 0'
+ELSE
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempGetStateItemExclusive
+            @id         tSessionId,
+            @itemShort  tSessionItemShort OUTPUT,
+            @locked     bit OUTPUT,
+            @lockDate   datetime OUTPUT,
+            @lockCookie int OUTPUT
+        AS
+            DECLARE @textptr AS tTextPtr
+            DECLARE @length AS int
+            DECLARE @now AS datetime
+
+            SET @now = GETDATE()
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, Timeout, @now), 
+                @lockDate = LockDate = CASE Locked
+                    WHEN 0 THEN @now
+                    ELSE LockDate
+                    END,
+                @lockCookie = LockCookie = CASE Locked
+                    WHEN 0 THEN LockCookie + 1
+                    ELSE LockCookie
+                    END,
+                @itemShort = CASE Locked
+                    WHEN 0 THEN SessionItemShort
+                    ELSE NULL
+                    END,
+                @textptr = CASE Locked
+                    WHEN 0 THEN TEXTPTR(SessionItemLong)
+                    ELSE NULL
+                    END,
+                @length = CASE Locked
+                    WHEN 0 THEN DATALENGTH(SessionItemLong)
+                    ELSE NULL
+                    END,
+                @locked = Locked,
+                Locked = 1
+            WHERE SessionId = @id
+            IF @length IS NOT NULL BEGIN
+                READTEXT [ASPState].dbo.ASPStateTempSessions.SessionItemLong @textptr 0 @length
+            END
+
+            RETURN 0'    
+
+EXEC (@cmd)    
+GO
+
+
+/*****************************************************************************/
+
+DECLARE @ver int
+EXEC dbo.GetMajorVersion @@ver=@ver OUTPUT
+DECLARE @cmd nchar(4000)
+IF (@ver >= 8)
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempGetStateItemExclusive2
+            @id         tSessionId,
+            @itemShort  tSessionItemShort OUTPUT,
+            @locked     bit OUTPUT,
+            @lockAge    int OUTPUT,
+            @lockCookie int OUTPUT
+        AS
+            DECLARE @textptr AS tTextPtr
+            DECLARE @length AS int
+            DECLARE @now AS datetime
+            DECLARE @nowLocal AS datetime
+
+            SET @now = GETUTCDATE()
+            SET @nowLocal = GETDATE()
+            
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, Timeout, @now), 
+                LockDate = CASE Locked
+                    WHEN 0 THEN @now
+                    ELSE LockDate
+                    END,
+                LockDateLocal = CASE Locked
+                    WHEN 0 THEN @nowLocal
+                    ELSE LockDateLocal
+                    END,
+                @lockAge = CASE Locked
+                    WHEN 0 THEN 0
+                    ELSE DATEDIFF(second, LockDate, @now)
+                    END,
+                @lockCookie = LockCookie = CASE Locked
+                    WHEN 0 THEN LockCookie + 1
+                    ELSE LockCookie
+                    END,
+                @itemShort = CASE Locked
+                    WHEN 0 THEN SessionItemShort
+                    ELSE NULL
+                    END,
+                @textptr = CASE Locked
+                    WHEN 0 THEN TEXTPTR(SessionItemLong)
+                    ELSE NULL
+                    END,
+                @length = CASE Locked
+                    WHEN 0 THEN DATALENGTH(SessionItemLong)
+                    ELSE NULL
+                    END,
+                @locked = Locked,
+                Locked = 1
+            WHERE SessionId = @id
+            IF @length IS NOT NULL BEGIN
+                READTEXT [ASPState].dbo.ASPStateTempSessions.SessionItemLong @textptr 0 @length
+            END
+
+            RETURN 0'
+
+EXEC (@cmd)    
+GO
+
+
+/*****************************************************************************/
+
+DECLARE @ver int
+EXEC dbo.GetMajorVersion @@ver=@ver OUTPUT
+DECLARE @cmd nchar(4000)
+IF (@ver >= 8)
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempGetStateItemExclusive3
+            @id         tSessionId,
+            @itemShort  tSessionItemShort OUTPUT,
+            @locked     bit OUTPUT,
+            @lockAge    int OUTPUT,
+            @lockCookie int OUTPUT,
+            @actionFlags int OUTPUT
+        AS
+            DECLARE @textptr AS tTextPtr
+            DECLARE @length AS int
+            DECLARE @now AS datetime
+            DECLARE @nowLocal AS datetime
+
+            SET @now = GETUTCDATE()
+            SET @nowLocal = GETDATE()
+            
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, Timeout, @now), 
+                LockDate = CASE Locked
+                    WHEN 0 THEN @now
+                    ELSE LockDate
+                    END,
+                LockDateLocal = CASE Locked
+                    WHEN 0 THEN @nowLocal
+                    ELSE LockDateLocal
+                    END,
+                @lockAge = CASE Locked
+                    WHEN 0 THEN 0
+                    ELSE DATEDIFF(second, LockDate, @now)
+                    END,
+                @lockCookie = LockCookie = CASE Locked
+                    WHEN 0 THEN LockCookie + 1
+                    ELSE LockCookie
+                    END,
+                @itemShort = CASE Locked
+                    WHEN 0 THEN SessionItemShort
+                    ELSE NULL
+                    END,
+                @textptr = CASE Locked
+                    WHEN 0 THEN TEXTPTR(SessionItemLong)
+                    ELSE NULL
+                    END,
+                @length = CASE Locked
+                    WHEN 0 THEN DATALENGTH(SessionItemLong)
+                    ELSE NULL
+                    END,
+                @locked = Locked,
+                Locked = 1,
+
+                /* If the Uninitialized flag (0x1) if it is set,
+                   remove it and return InitializeItem (0x1) in actionFlags */
+                Flags = CASE
+                    WHEN (Flags & 1) <> 0 THEN (Flags & ~1)
+                    ELSE Flags
+                    END,
+                @actionFlags = CASE
+                    WHEN (Flags & 1) <> 0 THEN 1
+                    ELSE 0
+                    END
+            WHERE SessionId = @id
+            IF @length IS NOT NULL BEGIN
+                READTEXT [ASPState].dbo.ASPStateTempSessions.SessionItemLong @textptr 0 @length
+            END
+
+            RETURN 0'
+ELSE
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempGetStateItemExclusive3
+            @id         tSessionId,
+            @itemShort  tSessionItemShort OUTPUT,
+            @locked     bit OUTPUT,
+            @lockDate   datetime OUTPUT,
+            @lockCookie int OUTPUT,
+            @actionFlags int OUTPUT
+        AS
+            DECLARE @textptr AS tTextPtr
+            DECLARE @length AS int
+            DECLARE @now AS datetime
+
+            SET @now = GETDATE()
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, Timeout, @now), 
+                @lockDate = LockDate = CASE Locked
+                    WHEN 0 THEN @now
+                    ELSE LockDate
+                    END,
+                @lockCookie = LockCookie = CASE Locked
+                    WHEN 0 THEN LockCookie + 1
+                    ELSE LockCookie
+                    END,
+                @itemShort = CASE Locked
+                    WHEN 0 THEN SessionItemShort
+                    ELSE NULL
+                    END,
+                @textptr = CASE Locked
+                    WHEN 0 THEN TEXTPTR(SessionItemLong)
+                    ELSE NULL
+                    END,
+                @length = CASE Locked
+                    WHEN 0 THEN DATALENGTH(SessionItemLong)
+                    ELSE NULL
+                    END,
+                @locked = Locked,
+                Locked = 1,
+
+                /* If the Uninitialized flag (0x1) if it is set,
+                   remove it and return InitializeItem (0x1) in actionFlags */
+                Flags = CASE
+                    WHEN (Flags & 1) <> 0 THEN (Flags & ~1)
+                    ELSE Flags
+                    END,
+                @actionFlags = CASE
+                    WHEN (Flags & 1) <> 0 THEN 1
+                    ELSE 0
+                    END
+            WHERE SessionId = @id
+            IF @length IS NOT NULL BEGIN
+                READTEXT [ASPState].dbo.ASPStateTempSessions.SessionItemLong @textptr 0 @length
+            END
+
+            RETURN 0'    
+
+EXEC (@cmd)    
+GO
+
+
+/*****************************************************************************/
+
+DECLARE @ver int
+EXEC dbo.GetMajorVersion @@ver=@ver OUTPUT
+DECLARE @cmd nchar(4000)
+IF (@ver >= 8)
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempReleaseStateItemExclusive
+            @id         tSessionId,
+            @lockCookie int
+        AS
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, Timeout, GETUTCDATE()), 
+                Locked = 0
+            WHERE SessionId = @id AND LockCookie = @lockCookie
+
+            RETURN 0'
+ELSE
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempReleaseStateItemExclusive
+            @id         tSessionId,
+            @lockCookie int
+        AS
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, Timeout, GETDATE()), 
+                Locked = 0
+            WHERE SessionId = @id AND LockCookie = @lockCookie
+
+            RETURN 0'
+
+EXEC (@cmd)    
+GO
+
+
+/*****************************************************************************/
+
+DECLARE @ver int
+EXEC dbo.GetMajorVersion @@ver=@ver OUTPUT
+DECLARE @cmd nchar(4000)
+IF (@ver >= 8)
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempInsertUninitializedItem
+            @id         tSessionId,
+            @itemShort  tSessionItemShort,
+            @timeout    int
+        AS    
+
+            DECLARE @now AS datetime
+            DECLARE @nowLocal AS datetime
+            
+            SET @now = GETUTCDATE()
+            SET @nowLocal = GETDATE()
+
+            INSERT [ASPState].dbo.ASPStateTempSessions 
+                (SessionId, 
+                 SessionItemShort, 
+                 Timeout, 
+                 Expires, 
+                 Locked, 
+                 LockDate,
+                 LockDateLocal,
+                 LockCookie,
+                 Flags) 
+            VALUES 
+                (@id, 
+                 @itemShort, 
+                 @timeout, 
+                 DATEADD(n, @timeout, @now), 
+                 0, 
+                 @now,
+                 @nowLocal,
+                 1,
+                 1)
+
+            RETURN 0'
+ELSE
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempInsertUninitializedItem
+            @id         tSessionId,
+            @itemShort  tSessionItemShort,
+            @timeout    int
+        AS    
+
+            DECLARE @now AS datetime
+            SET @now = GETDATE()
+
+            INSERT [ASPState].dbo.ASPStateTempSessions 
+                (SessionId, 
+                 SessionItemShort, 
+                 Timeout, 
+                 Expires, 
+                 Locked, 
+                 LockDate,
+                 LockCookie,
+                 Flags) 
+            VALUES 
+                (@id, 
+                 @itemShort, 
+                 @timeout, 
+                 DATEADD(n, @timeout, @now), 
+                 0, 
+                 @now,
+                 1,
+                 1)
+
+            RETURN 0'
+
+EXEC (@cmd)    
+GO
+
+
+/*****************************************************************************/
+
+DECLARE @ver int
+EXEC dbo.GetMajorVersion @@ver=@ver OUTPUT
+DECLARE @cmd nchar(4000)
+IF (@ver >= 8)
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempInsertStateItemShort
+            @id         tSessionId,
+            @itemShort  tSessionItemShort,
+            @timeout    int
+        AS    
+
+            DECLARE @now AS datetime
+            DECLARE @nowLocal AS datetime
+            
+            SET @now = GETUTCDATE()
+            SET @nowLocal = GETDATE()
+
+            INSERT [ASPState].dbo.ASPStateTempSessions 
+                (SessionId, 
+                 SessionItemShort, 
+                 Timeout, 
+                 Expires, 
+                 Locked, 
+                 LockDate,
+                 LockDateLocal,
+                 LockCookie) 
+            VALUES 
+                (@id, 
+                 @itemShort, 
+                 @timeout, 
+                 DATEADD(n, @timeout, @now), 
+                 0, 
+                 @now,
+                 @nowLocal,
+                 1)
+
+            RETURN 0'
+ELSE
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempInsertStateItemShort
+            @id         tSessionId,
+            @itemShort  tSessionItemShort,
+            @timeout    int
+        AS    
+
+            DECLARE @now AS datetime
+            SET @now = GETDATE()
+
+            INSERT [ASPState].dbo.ASPStateTempSessions 
+                (SessionId, 
+                 SessionItemShort, 
+                 Timeout, 
+                 Expires, 
+                 Locked, 
+                 LockDate,
+                 LockCookie) 
+            VALUES 
+                (@id, 
+                 @itemShort, 
+                 @timeout, 
+                 DATEADD(n, @timeout, @now), 
+                 0, 
+                 @now,
+                 1)
+
+            RETURN 0'
+
+EXEC (@cmd)    
+GO
+
+
+/*****************************************************************************/
+
+DECLARE @ver int
+EXEC dbo.GetMajorVersion @@ver=@ver OUTPUT
+DECLARE @cmd nchar(4000)
+IF (@ver >= 8)
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempInsertStateItemLong
+            @id         tSessionId,
+            @itemLong   tSessionItemLong,
+            @timeout    int
+        AS    
+            DECLARE @now AS datetime
+            DECLARE @nowLocal AS datetime
+            
+            SET @now = GETUTCDATE()
+            SET @nowLocal = GETDATE()
+
+            INSERT [ASPState].dbo.ASPStateTempSessions 
+                (SessionId, 
+                 SessionItemLong, 
+                 Timeout, ‚;Å € €
+                 Expires, 
+                 Locked, 
+                 LockDate,
+                 LockDateLocal,
+                 LockCookie) 
+            VALUES 
+                (@id, 
+                 @itemLong, 
+                 @timeout, 
+                 DATEADD(n, @timeout, @now), 
+                 0, 
+                 @now,
+                 @nowLocal,
+                 1)
+
+            RETURN 0'
+ELSE
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempInsertStateItemLong
+            @id         tSessionId,
+            @itemLong   tSessionItemLong,
+            @timeout    int
+        AS    
+            DECLARE @now AS datetime
+            SET @now = GETDATE()
+
+            INSERT [ASPState].dbo.ASPStateTempSessions 
+                (SessionId, 
+                 SessionItemLong, 
+                 Timeout, 
+                 Expires, 
+                 Locked, 
+                 LockDate,
+                 LockCookie) 
+            VALUES 
+                (@id, 
+                 @itemLong, 
+                 @timeout, 
+                 DATEADD(n, @timeout, @now), 
+                 0, 
+                 @now,
+                 1)
+
+            RETURN 0'
+
+EXEC (@cmd)    
+GO
+
+
+/*****************************************************************************/
+
+DECLARE @ver int
+EXEC dbo.GetMajorVersion @@ver=@ver OUTPUT
+DECLARE @cmd nchar(4000)
+IF (@ver >= 8)
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempUpdateStateItemShort
+            @id         tSessionId,
+            @itemShort  tSessionItemShort,
+            @timeout    int,
+            @lockCookie int
+        AS    
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, @timeout, GETUTCDATE()), 
+                SessionItemShort = @itemShort, 
+                Timeout = @timeout,
+                Locked = 0
+            WHERE SessionId = @id AND LockCookie = @lockCookie
+
+            RETURN 0'
+ELSE
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempUpdateStateItemShort
+            @id         tSessionId,
+            @itemShort  tSessionItemShort,
+            @timeout    int,
+            @lockCookie int
+        AS    
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, @timeout, GETDATE()), 
+                SessionItemShort = @itemShort, 
+                Timeout = @timeout,
+                Locked = 0
+            WHERE SessionId = @id AND LockCookie = @lockCookie
+
+            RETURN 0'
+
+EXEC (@cmd)    
+GO
+
+
+/*****************************************************************************/
+
+DECLARE @ver int
+EXEC dbo.GetMajorVersion @@ver=@ver OUTPUT
+DECLARE @cmd nchar(4000)
+IF (@ver >= 8)
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempUpdateStateItemShortNullLong
+            @id         tSessionId,
+            @itemShort  tSessionItemShort,
+            @timeout    int,
+            @lockCookie int
+        AS    
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, @timeout, GETUTCDATE()), 
+                SessionItemShort = @itemShort, 
+                SessionItemLong = NULL, 
+                Timeout = @timeout,
+                Locked = 0
+            WHERE SessionId = @id AND LockCookie = @lockCookie
+
+            RETURN 0'
+ELSE
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempUpdateStateItemShortNullLong
+            @id         tSessionId,
+            @itemShort  tSessionItemShort,
+            @timeout    int,
+            @lockCookie int
+        AS    
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, @timeout, GETDATE()), 
+                SessionItemShort = @itemShort, 
+                SessionItemLong = NULL, 
+                Timeout = @timeout,
+                Locked = 0
+            WHERE SessionId = @id AND LockCookie = @lockCookie
+
+            RETURN 0'
+
+EXEC (@cmd)    
+GO
+
+
+/*****************************************************************************/
+
+DECLARE @ver int
+EXEC dbo.GetMajorVersion @@ver=@ver OUTPUT
+DECLARE @cmd nchar(4000)
+IF (@ver >= 8)
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempUpdateStateItemLong
+            @id         tSessionId,
+            @itemLong   tSessionItemLong,
+            @timeout    int,
+            @lockCookie int
+        AS    
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, @timeout, GETUTCDATE()), 
+                SessionItemLong = @itemLong,
+                Timeout = @timeout,
+                Locked = 0
+            WHERE SessionId = @id AND LockCookie = @lockCookie
+
+            RETURN 0'
+ELSE
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempUpdateStateItemLong
+            @id         tSessionId,
+            @itemLong   tSessionItemLong,
+            @timeout    int,
+            @lockCookie int
+        AS    
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, @timeout, GETDATE()), 
+                SessionItemLong = @itemLong,
+                Timeout = @timeout,
+                Locked = 0
+            WHERE SessionId = @id AND LockCookie = @lockCookie
+
+            RETURN 0'
+
+EXEC (@cmd)            
+GO
+
+
+/*****************************************************************************/
+
+DECLARE @ver int
+EXEC dbo.GetMajorVersion @@ver=@ver OUTPUT
+DECLARE @cmd nchar(4000)
+IF (@ver >= 8)
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempUpdateStateItemLongNullShort
+            @id         tSessionId,
+            @itemLong   tSessionItemLong,
+            @timeout    int,
+            @lockCookie int
+        AS    
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, @timeout, GETUTCDATE()), 
+                SessionItemLong = @itemLong, 
+                SessionItemShort = NULL,
+                Timeout = @timeout,
+                Locked = 0
+            WHERE SessionId = @id AND LockCookie = @lockCookie
+
+            RETURN 0'
+ELSE
+    SET @cmd = N'
+    CREATE PROCEDURE dbo.TempUpdateStateItemLongNullShort
+        @id         tSessionId,
+        @itemLong   tSessionItemLong,
+        @timeout    int,
+        @lockCookie int
+    AS    
+        UPDATE [ASPState].dbo.ASPStateTempSessions
+        SET Expires = DATEADD(n, @timeout, GETDATE()), 
+            SessionItemLong = @itemLong, 
+            SessionItemShort = NULL,
+            Timeout = @timeout,
+            Locked = 0
+        WHERE SessionId = @id AND LockCookie = @lockCookie
+
+        RETURN 0'
+
+EXEC (@cmd)            
+GO
+
+/*****************************************************************************/
+
+DECLARE @cmd nchar(4000)
+SET @cmd = N'
+    CREATE PROCEDURE dbo.TempRemoveStateItem
+        @id     tSessionId,
+        @lockCookie int
+    AS
+        DELETE [ASPState].dbo.ASPStateTempSessions
+        WHERE SessionId = @id AND LockCookie = @lockCookie
+        RETURN 0'
+EXEC(@cmd)    
+GO
+            
+/*****************************************************************************/
+
+DECLARE @ver int
+EXEC dbo.GetMajorVersion @@ver=@ver OUTPUT
+DECLARE @cmd nchar(4000)
+IF (@ver >= 8)
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempResetTimeout
+            @id     tSessionId
+        AS
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, Timeout, GETUTCDATE())
+            WHERE SessionId = @id
+            RETURN 0'
+ELSE
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.TempResetTimeout
+            @id     tSessionId
+        AS
+            UPDATE [ASPState].dbo.ASPStateTempSessions
+            SET Expires = DATEADD(n, Timeout, GETDATE())
+            WHERE SessionId = @id
+            RETURN 0'
+
+EXEC (@cmd)            
+GO
+
+            
+/*****************************************************************************/
+
+DECLARE @ver int
+EXEC dbo.GetMajorVersion @@ver=@ver OUTPUT
+DECLARE @cmd nchar(4000)
+IF (@ver >= 8)
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.DeleteExpiredSessions
+        AS
+            SET NOCOUNT ON
+            SET DEADLOCK_PRIORITY LOW 
+
+            DECLARE @now datetime
+            SET @now = GETUTCDATE() 
+
+            CREATE TABLE #tblExpiredSessions 
+            ( 
+                SessionId nvarchar(88) NOT NULL PRIMARY KEY
+            )
+
+            INSERT #tblExpiredSessions (SessionId)
+                SELECT SessionId
+                FROM [ASPState].dbo.ASPStateTempSessions WITH (READUNCOMMITTED)
+                WHERE Expires < @now
+
+            IF @@ROWCOUNT <> 0 
+            BEGIN 
+                DECLARE ExpiredSessionCursor CURSOR LOCAL FORWARD_ONLY READ_ONLY
+                FOR SELECT SessionId FROM #tblExpiredSessions 
+
+                DECLARE @SessionId nvarchar(88)
+
+                OPEN ExpiredSessionCursor
+
+                FETCH NEXT FROM ExpiredSessionCursor INTO @SessionId
+
+                WHILE @@FETCH_STATUS = 0 
+                    BEGIN
+                        DELETE FROM [ASPState].dbo.ASPStateTempSessions WHERE SessionId = @SessionId AND Expires < @now
+                        FETCH NEXT FROM ExpiredSessionCursor INTO @SessionId
+                    END
+
+                CLOSE ExpiredSessionCursor
+
+                DEALLOCATE ExpiredSessionCursor
+
+            END 
+
+            DROP TABLE #tblExpiredSessions
+
+        RETURN 0'
+ELSE
+    SET @cmd = N'
+        CREATE PROCEDURE dbo.DeleteExpiredSessions
+        AS
+            SET NOCOUNT ON
+            SET DEADLOCK_PRIORITY LOW 
+
+            DECLARE @now datetime
+            SET @now = GETDATE() 
+
+            CREATE TABLE #tblExpiredSessions 
+            ( 
+                SessionId nvarchar(88) NOT NULL PRIMARY KEY
+            )
+
+            INSERT #tblExpiredSessions (SessionId)
+                SELECT SessionId
+                FROM [ASPState].dbo.ASPStateTempSessions WITH (READUNCOMMITTED)
+                WHERE Expires < @now
+
+            IF @@ROWCOUNT <> 0 
+            BEGIN 
+                DECLARE ExpiredSessionCursor CURSOR LOCAL FORWARD_ONLY READ_ONLY
+                FOR SELECT SessionId FROM #tblExpiredSessions 
+
+                DECLARE @SessionId nvarchar(88)
+
+                OPEN ExpiredSessionCursor
+
+                FETCH NEXT FROM ExpiredSessionCursor INTO @SessionId
+
+                WHILE @@FETCH_STATUS = 0 
+                    BEGIN
+                        DELETE FROM [ASPState].dbo.ASPStateTempSessions WHERE SessionId = @SessionId AND Expires < @now
+                        FETCH NEXT FROM ExpiredSessionCursor INTO @SessionId
+                    END
+
+                CLOSE ExpiredSessionCursor
+
+                DEALLOCATE ExpiredSessionCursor
+
+            END 
+
+            DROP TABLE #tblExpiredSessions
+
+        RETURN 0'
+EXEC (@cmd)            
+GO
+            
+/*****************************************************************************/
+
+EXECUTE dbo.CreateTempTables
+GO
+
+USE master
+GO
+
+DECLARE @sstype nvarchar(128)
+SET @sstype = N'sstype_persisted'
+
+IF UPPER(@sstype) = 'SSTYPE_TEMP' BEGIN
+    DECLARE @cmd nchar(4000)
+
+    SET @cmd = N'
+        /* Create the startup procedure */
+        CREATE PROCEDURE dbo.ASPState_Startup 
+        AS
+            EXECUTE ASPState.dbo.CreateTempTables
+
+            RETURN 0'
+    EXEC(@cmd)
+    EXECUTE sp_procoption @ProcName='dbo.ASPState_Startup', @OptionName='startup', @OptionValue='true'
+END    
+
+/*****************************************************************************/
+
+/* Create the job to delete expired sessions */
+
+-- Add job category
+-- We expect an error if the category already exists.
+PRINT 'If the category already exists, an error from msdb.dbo.sp_add_category is expected.'
+EXECUTE msdb.dbo.sp_add_category @name = N'[Uncategorized (Local)]'
+GO
+
+BEGIN TRANSACTION            
+    DECLARE @JobID BINARY(16)  
+    DECLARE @ReturnCode int    
+    DECLARE @nameT nchar(200)
+    SELECT @ReturnCode = 0     
+
+    -- Add the job
+    SET @nameT = N'ASPState' + '_Job_DeleteExpiredSessions'
+    EXECUTE @ReturnCode = msdb.dbo.sp_add_job 
+            @job_id = @JobID OUTPUT, 
+            @job_name = @nameT, 
+            @owner_login_name = NULL, 
+            @description = N'Deletes expired sessions from the session state database.', 
+            @category_name = N'[Uncategorized (Local)]', 
+            @enabled = 1, 
+            @notify_level_email = 0, 
+            @notify_level_page = 0, 
+            @notify_level_netsend = 0, 
+            @notify_level_eventlog = 0, 
+            @delete_level= 0
+
+    IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback 
+    
+    -- Add the job steps
+    SET @nameT = N'ASPState' + '_JobStep_DeleteExpiredSessions'
+    EXECUTE @ReturnCode = msdb.dbo.sp_add_jobstep 
+            @job_id = @JobID,
+            @step_id = 1, 
+            @step_name = @nameT, 
+            @command = N'EXECUTE DeleteExpiredSessions', 
+            @database_name = N'ASPState', 
+            @server = N'', 
+            @database_user_name = N'', 
+            @subsystem = N'TSQL', 
+            @cmdexec_success_code = 0, 
+            @flags = 0, 
+            @retry_attempts = 0, 
+            @retry_interval = 1, 
+            @output_file_name = N'', 
+            @on_success_step_id = 0, 
+            @on_success_action = 1, 
+            @on_fail_step_id = 0, 
+            @on_fail_action = 2
+
+    IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback 
+
+    EXECUTE @ReturnCode = msdb.dbo.sp_update_job @job_id = @JobID, @start_step_id = 1 
+    IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback 
+    
+    -- Add the job schedules
+    SET @nameT = N'ASPState' + '_JobSchedule_DeleteExpiredSessions'
+    EXECUTE @ReturnCode = msdb.dbo.sp_add_jobschedule 
+            @job_id = @JobID, 
+            @name = @nameT, 
+            @enabled = 1, 
+            @freq_type = 4,     
+            @active_start_date = 20001016, 
+            @active_start_time = 0, 
+            @freq_interval = 1, 
+            @freq_subday_type = 4, 
+            @freq_subday_interval = 1, 
+            @freq_relative_interval = 0, 
+            @freq_recurrence_factor = 0, 
+            @active_end_date = 99991231, 
+            @active_end_time = 235959
+
+    IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback 
+    
+    -- Add the Target Servers
+    EXECUTE @ReturnCode = msdb.dbo.sp_add_jobserver @job_id = @JobID, @server_name = N'(local)' 
+    IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback 
+    
+    COMMIT TRANSACTION          
+    GOTO   EndSave              
+QuitWithRollback:
+    IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION 
+EndSave: 
+GO
+
+/*************************************************************/
+/*************************************************************/
+/*************************************************************/
+/*************************************************************/
+
+PRINT ''
+PRINT '-------------------------------------------------'
+PRINT 'Completed execution of InstallPersistSqlState.SQL'
+PRINT '-------------------------------------------------'
+
+/**********************************************************************/
+/* InstallPersonalization.SQL                                         */
+/*                                                                    */
+/* Installs the tables, triggers and stored procedures necessary for  */
+/* supporting the personalization feature of ASP.NET                  */
+/*                                                                    */
+/* InstallCommon.sql must be run before running this file.            */
+/*
+** Copyright Microsoft, Inc. 2002
+** All Rights Reserved.
+*/
+/**********************************************************************/
+
+PRINT '------------------------------------------------'
+PRINT 'Starting execution of InstallPersonalization.SQL'
+PRINT '------------------------------------------------'
+GO
+
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON         -- We don't want (NULL = NULL) == TRUE
+GO
+SET ANSI_PADDING ON
+GO
+SET ANSI_NULL_DFLT_ON ON
+GO
+
+/*************************************************************/
+/*************************************************************/
+/*************************************************************/
+/*************************************************************/
+/*************************************************************/
+
+DECLARE @dbname NVARCHAR(128)
+
+SET @dbname = N'aspnetdb'
+
+IF (NOT EXISTS (SELECT name
+                FROM master.dbo.sysdatabases
+                WHERE ('[' + name + ']' = @dbname OR name = @dbname)))
+BEGIN
+  RAISERROR('The database ''%s'' cannot be found. Please run InstallCommon.sql first.', 18, 1, @dbname)
+END
+GO
+
+USE [aspnetdb]
+GO
+
+IF (NOT EXISTS (SELECT name
+                FROM sysobjects
+                WHERE (name = N'aspnet_Applications')
+                  AND (type = 'U')))
+BEGIN
+  RAISERROR('The table ''aspnet_Applications'' cannot be found. Please use aspnet_regsql.exe for installing ASP.NET application services.', 18, 1)
+END
+
+IF (NOT EXISTS (SELECT name
+                FROM sysobjects
+                WHERE (name = N'aspnet_Users')
+                  AND (type = 'U')))
+BEGIN
+  RAISERROR('The table ''aspnet_Users'' cannot be found. Please use aspnet_regsql.exe for installing ASP.NET application services.', 18, 1)
+END
+
+IF (NOT EXISTS (SELECT name
+              FROM sysobjects
+             WHERE (name = N'aspnet_Applications_CreateApplication')
+               AND (type = 'P')))
+BEGIN
+  RAISERROR('The stored procedure ''aspnet_Applications_CreateApplication'' cannot be found. Please use aspnet_regsql.exe for installing ASP.NET application services.', 18, 1)
+END
+
+IF (NOT EXISTS (SELECT name
+              FROM sysobjects
+             WHERE (name = N'aspnet_Users_CreateUser')
+               AND (type = 'P')))
+BEGIN
+  RAISERROR('The stored procedure ''aspnet_Users_CreateUser'' cannot be found. Please use aspnet_regsql.exe for installing ASP.NET application services.', 18, 1)
+END
+
+IF (NOT EXISTS (SELECT name
+              FROM sysobjects
+             WHERE (name = N'aspnet_Users_DeleteUser')
+               AND (type = 'P')))
+BEGIN
+  RAISERROR('The stored procedure ''aspnet_Users_DeleteUser'' cannot be found. Please use aspnet_regsql.exe for installing ASP.NET application services.', 18, 1)
+END
+
+/***************************************************************************************************************************/
+/***************************************************************************************************************************/
+
+IF (NOT EXISTS (SELECT name
+                FROM sysobjects
+                WHERE (name = N'aspnet_Paths')
+                  AND (type = 'U')))
+BEGIN
+  PRINT 'Creating the aspnet_Paths table...'
+  CREATE TABLE dbo.aspnet_Paths (
+        ApplicationId    UNIQUEIDENTIFIER    NOT NULL FOREIGN KEY REFERENCES dbo.aspnet_Applications(ApplicationId),
+        PathId            UNIQUEIDENTIFIER   PRIMARY KEY NONCLUSTERED DEFAULT NEWID(),
+        Path              NVARCHAR(256)      NOT NULL,
+        LoweredPath       NVARCHAR(256)      NOT NULL)
+  CREATE UNIQUE CLUSTERED INDEX aspnet_Paths_index ON dbo.aspnet_Paths(ApplicationId, LoweredPath)
+END
+
+
+/***************************************************************************************************************************/
+/***************************************************************************************************************************/
+
+IF (EXISTS (SELECT name
+              FROM sysobjects
+             WHERE (name = N'aspnet_Personalization_GetApplicationId')
+               AND (type = 'P')))
+DROP PROCEDURE dbo.aspnet_Personalization_GetApplicationId
+GO
+CREATE PROCEDURE dbo.aspnet_Personalization_GetApplicationId (
+    @ApplicationName NVARCHAR(256),
+    @ApplicationId UNIQUEIDENTIFIER OUT)
+AS
+BEGIN
+    SELECT @ApplicationId = ApplicationId FROM dbo.aspnet_Applications WHERE LOWER(@ApplicationName) = LoweredApplicationName
+END
+GO
+
+/***************************************************************************************************************************/
+/***************************************************************************************************************************/
+
+IF (EXISTS (SELECT name
+              FROM sysobjects
+             WHERE (name = N'aspnet_Paths_CreatePath')
+               AND (type = 'P')))
+DROP PROCEDURE dbo.aspnet_Paths_CreatePath
+GO
+CREATE PROCEDURE dbo.aspnet_Paths_CreatePath
+    @ApplicationId UNIQUEIDENTIFIER,
+    @Path           NVARCHAR(256),
+    @PathId         UNIQUEIDENTIFIER OUTPUT
+AS
+BEGIN
+    BEGIN TRANSACTION
+    IF (NOT EXISTS(SELECT * FROM dbo.aspnet_Paths WHERE LoweredPath = LOWER(@Path) AND ApplicationId = @ApplicationId))
+    BEGIN
+        INSERT dbo.aspnet_Paths (ApplicationId, Path, LoweredPath) VALUES (@ApplicationId, @Path, LOWER(@Path))
+    END
+    COMMIT TRANSACTION
+    SELECT @PathId = PathId FROM dbo.aspnet_Paths WHERE LOWER(@Path) = LoweredPath AND ApplicationId = @ApplicationId
+END
+GO
+
+/***************************************************************************************************************************/
+
+IF (NOT EXISTS (SELECT name
+                FROM sysobjects
+                WHERE (name = N'aspnet_PersonalizationAllUsers')
+                  AND (type = 'U')))
+BEGIN
+  PRINT 'Creating the aspnet_PersonalizationAllUsers table...'
+  CREATE TABLE dbo.aspnet_PersonalizationAllUsers (
+        PathId            UNIQUEIDENTIFIER PRIMARY KEY FOREIGN KEY REFERENCES dbo.aspnet_Paths (PathId),
+        PageSettings     IMAGE NOT NULL,
+        LastUpdatedDate  DATETIME NOT NULL)
+END
+
+
+IF (NOT EXISTS (SELECT name
+                FROM sysobjects
+                WHERE (name = N'aspnet_PersonalizationPerUser')
+                  AND (type = 'U')))
+BEGIN
+  PRINT 'Creating the aspnet_PersonalizationPerUser table...'
+  CREATE TABLE dbo.aspnet_PersonalizationPerUser (
+        Id               UNIQUEIDENTIFIER NOT NULL PRIMARY KEY NONCLUSTERED DEFAULT NEWID(),
+        PathId           UNIQUEIDENTIFIER FOREIGN KEY REFERENCES dbo.aspnet_Paths (PathId),
+        UserId           UNIQUEIDENTIFIER FOREIGN KEY REFERENCES dbo.aspnet_Users (UserId),
+        PageSettings     IMAGE NOT NULL,
+        LastUpdatedDate  DATETIME NOT NULL)
+  CREATE UNIQUE CLUSTERED INDEX aspnet_PersonalizationPerUser_index1 ON [dbo].[aspnet_PersonalizationPerUser](PathId,UserId)
+  CREATE UNIQUE INDEX aspnet_PersonalizationPerUser_ncindex2 ON [dbo].[aspnet_PersonalizationPerUser](UserId,PathId)
+END
+
+
+IF (EXISTS (SELECT name
+              FROM sysobjects
+             WHERE (name = N'aspnet_PersonalizationAllUsers_GetPageSettings')
+               AND (type = 'P')))
+DROP PROCEDURE dbo.aspnet_PersonalizationAllUsers_GetPageSettings
+GO
+CREATE PROCEDURE dbo.aspnet_PersonalizationAllUsers_GetPageSettings (
+    @ApplicationName  NVARCHAR(256),
+    @Path              NVARCHAR(256))
+AS
+BEGIN
+    DECLARE @ApplicationId UNIQUEIDENTIFIER
+    DECLARE @PathId UNIQUEIDENTIFIER
+
+    SELECT @ApplicationId = NULL
+    SELECT @PathId = NULL
+
+    EXEC dbo.aspnet_Personalization_GetApplicationId @ApplicationName, @ApplicationId OUTPUT
+    IF (@ApplicationId IS NULL)
+    BEGIN
+        RETURN
+    END
+
+    SELECT @PathId = u.PathId FROM dbo.aspnet_Paths u WHERE u.ApplicationId = @ApplicationId AND u.LoweredPath = LOWER(@Path)
+    IF (@PathId IS NULL)
+    BEGIN
+        RETURN
+    END
+
+    SELECT p.PageSettings FROM dbo.aspnet_PersonalizationAllUsers p WHERE p.PathId = @PathId
+END
+GO
+
+
+IF (EXISTS (SELECT name
+              FROM sysobjects
+             WHERE (name = N'aspnet_PersonalizationAllUsers_ResetPageSettings')
+               AND (type = 'P')))
+DROP PROCEDURE dbo.aspnet_PersonalizationAllUsers_ResetPageSettings
+GO
+CREATE PROCEDURE dbo.aspnet_PersonalizationAllUsers_ResetPageSettings (
+    @ApplicationName  NVARCHAR(256),
+    @Path              NVARCHAR(256))
+AS
+BEGIN
+    DECLARE @ApplicationId UNIQUEIDENTIFIER
+    DECLARE @PathId UNIQUEIDENTIFIER
+
+    SELECT @ApplicationId = NULL
+    SELECT @PathId = NULL
+
+    EXEC dbo.aspnet_Personalization_GetApplicationId @ApplicationName, @ApplicationId OUTPUT
+    IF (@ApplicationId IS NULL)
+    BEGIN
+        RETURN
+    END
+
+    SELECT @PathId = u.PathId FROM dbo.aspnet_Paths u WHERE u.ApplicationId = @ApplicationId AND u.LoweredPath = LOWER(@Path)
+    IF (@PathId IS NULL)
+    BEGIN
+        RETURN
+    END
+
+    DELETE FROM dbo.aspnet_PersonalizationAllUsers WHERE PathId = @PathId
+    RETURN 0
+END
+GO
+
+
+IF (EXISTS (SELECT name
+              FROM sysobjects
+             WHERE (name = N'aspnet_PersonalizationAllUsers_SetPageSettings')
+               AND (type = 'P')))
+DROP PROCEDURE dbo.aspnet_PersonalizationAllUsers_SetPageSettings
+GO
+CREATE PROCEDURE dbo.aspnet_PersonalizationAllUsers_SetPageSettings (
+    @ApplicationName  NVARCHAR(256),
+    @Path             NVARCHAR(256),
+    @PageSettings     IMAGE,
+    @CurrentTimeUtc   DATETIME)
+AS
+BEGIN
+    DECLARE @ApplicationId UNIQUEIDENTIFIER
+    DECLARE @PathId UNIQUEIDENTIFIER
+
+    SELECT @ApplicationId = NULL
+    SELECT @PathId = NULL
+
+    EXEC dbo.aspnet_Applications_CreateApplication @ApplicationName, @ApplicationId OUTPUT
+
+    SELECT @PathId = u.PathId FROM dbo.aspnet_Paths u WHERE u.ApplicationId = @ApplicationId AND u.LoweredPath = LOWER(@Path)
+    IF (@PathId IS NULL)
+    BEGIN
+        EXEC dbo.aspnet_Paths_CreatePath @ApplicationId, @Path, @PathId OUTPUT
+    END
+
+    IF (EXISTS(SELECT PathId FROM dbo.aspnet_PersonalizationAllUsers WHERE PathId = @PathId))
+        UPDATE dbo.aspnet_PersonalizationAllUsers SET PageSettings = @PageSettings, LastUpdatedDate = @CurrentTimeUtc WHERE PathId = @PathId
+    ELSE
+        INSERT INTO dbo.aspnet_PersonalizationAllUsers(PathId, PageSettings, LastUpdatedDate) VALUES (@PathId, @PageSettings, @CurrentTimeUtc)
+    RETURN 0
+END
+GO
+
+
+IF (EXISTS (SELECT name
+              FROM sysobjects
+             WHERE (name = N'aspnet_PersonalizationPerUser_GetPageSettings')
+               AND (type = 'P')))
+DROP PROCEDURE dbo.aspnet_PersonalizationPerUser_GetPageSettings
+GO
+CREATE PROCEDURE dbo.aspnet_PersonalizationPerUser_GetPageSettings (
+    @ApplicationName  NVARCHAR(256),
+    @UserName         NVARCHAR(256),
+    @Path             NVARCHAR(256),
+    @CurrentTimeUtc   DATETIME)
+AS
+BEGIN
+    DECLARE @ApplicationId UNIQUEIDENTIFIER
+    DECLARE @PathId UNIQUEIDENTIFIER
+    DECLARE @UserId UNIQUEIDENTIFIER
+
+    SELECT @ApplicationId = NULL
+    SELECT @PathId = NULL
+    SELECT @UserId = NULL
+
+    EXEC dbo.aspnet_Personalization_GetApplicationId @ApplicationName, @ApplicationId OUTPUT
+    IF (@ApplicationId IS NULL)
+    BEGIN
+        RETURN
+    END
+
+    SELECT @PathId = u.PathId FROM dbo.aspnet_Paths u WHERE u.ApplicationId = @ApplicationId AND u.LoweredPath = LOWER(@Path)
+    IF (@PathId IS NULL)
+    BEGIN
+        RETURN
+    END
+
+    SELECT @UserId = u.UserId FROM dbo.aspnet_Users u WHERE u.ApplicationId = @ApplicationId AND u.LoweredUserName = LOWER(@UserName)
+    IF (@UserId IS NULL)
+    BEGIN
+        RETURN
+    END
+
+    UPDATE   dbo.aspnet_Users WITH (ROWLOCK)
+    SET      LastActivityDate = @CurrentTimeUtc
+    WHERE    UserId = @UserId
+    IF (@@ROWCOUNT = 0) -- Username not found
+        RETURN
+
+    SELECT p.PageSettings FROM dbo.aspnet_PersonalizationPerUser p WHERE p.PathId = @PathId AND p.UserId = @UserId
+END
+GO
+
+
+IF (EXISTS (SELECT name
+              FROM sysobjects
+             WHERE (name = N'aspnet_PersonalizationPerUser_ResetPageSettings')
+               AND (type = 'P')))
+DROP PROCEDURE dbo.aspnet_PersonalizationPerUser_ResetPageSettings
+GO
+CREATE PROCEDURE dbo.aspnet_PersonalizationPerUser_ResetPageSettings (
+    @ApplicationName  NVARCHAR(256),
+    @UserName         NVARCHAR(256),
+    @Path             NVARCHAR(256),
+    @CurrentTimeUtc   DATETIME)
+AS
+BEGIN
+    DECLARE @ApplicationId UNIQUEIDENTIFIER
+    DECLARE @PathId UNIQUEIDENTIFIER
+    DECLARE @UserId UNIQUEIDENTIFIER
+
+    SELECT @ApplicationId = NULL
+    SELECT @PathId = NULL
+    SELECT @UserId = NULL
+
+    EXEC dbo.aspnet_Personalization_GetApplicationId @ApplicationName, @ApplicationId OUTPUT
+    IF (@ApplicationId IS NULL)
+    BEGIN
+        RETURN
+    END
+
+    SELECT @PathId = u.PathId FROM dbo.aspnet_Paths u WHERE u.ApplicationId = @ApplicationId AND u.LoweredPath = LOWER(@Path)
+    IF (@PathId IS NULL)
+    BEGIN
+        RETURN
+    END
+
+    SELECT @UserId = u.UserId FROM dbo.aspnet_Users u WHERE u.ApplicationId = @ApplicationId AND u.LoweredUserName = LOWER(@UserName)
+    IF (@UserId IS NULL)
+    BEGIN
+        RETURN
+    END
+
+    UPDATE   dbo.aspnet_Users WITH (ROWLOCK)
+    SET      LastActivityDate = @CurrentTimeUtc
+    WHERE    UserId = @UserId
+    IF (@@ROWCOUNT = 0) -- Username not found
+        RETURN
+
+    DELETE FROM dbo.aspnet_PersonalizationPerUser WHERE PathId = @PathId AND UserId = @UserId
+    RETURN 0
+END
+GO
+
+
+IF (EXISTS (SELECT name
+              FROM sysobjects
+             WHERE (name = N'aspnet_PersonalizationPerUser_SetPageSettings')
+               AND (type = 'P')))
+DROP PROCEDURE dbo.aspnet_PersonalizationPerUser_SetPageSettings
+GO
+CREATE PROCEDURE dbo.aspnet_PersonalizationPerUser_SetPageSettings (
+    @ApplicationName  NVARCHAR(256),
+    @UserName         NVARCHAR(256),
+    @Path             NVARCHAR(256),
+    @PageSettings     IMAGE,
+    @CurrentTimeUtc   DATETIME)
+AS
+BEGIN
+    DECLARE @ApplicationId UNIQUEIDENTIFIER
+    DECLARE @PathId UNIQUEIDENTIFIER
+    DECLARE @UserId UNIQUEIDENTIFIER
+
+    SELECT @ApplicationId = NULL
+    SELECT @PathId = NULL
+    SELECT @UserId = NULL
+
+    EXEC dbo.aspnet_Applications_CreateApplication @ApplicationName, @ApplicationId OUTPUT
+
+    SELECT @PathId = u.PathId FROM dbo.aspnet_Paths u WHERE u.ApplicationId = @ApplicationId AND u.LoweredPath = LOWER(@Path)
+    IF (@PathId IS NULL)
+    BEGIN
+        EXEC dbo.aspnet_Paths_CreatePath @ApplicationId, @Path, @PathId OUTPUT
+    END
+
+    SELECT @UserId = u.UserId FROM dbo.aspnet_Users u WHERE u.ApplicationId = @ApplicationId AND u.LoweredUserName = LOWER(@UserName)
+    IF (@UserId IS NULL)
+    BEGIN
+        EXEC dbo.aspnet_Users_CreateUser @ApplicationId, @UserName, 0, @CurrentTimeUtc, @UserId OUTPUT
+    END
+
+    UPDATE   dbo.aspnet_Users WITH (ROWLOCK)
+    SET      LastActivityDate = @CurrentTimeUtc
+    WHERE    UserId = @UserId
+    IF (@@ROWCOUNT = 0) -- Username not found
+        RETURN
+
+    IF (EXISTS(SELECT PathId FROM dbo.aspnet_PersonalizationPerUser WHERE UserId = @UserId AND PathId = @PathId))
+        UPDATE dbo.aspnet_PersonalizationPerUser SET PageSettings = @PageSettings, LastUpdatedDate = @CurrentTimeUtc WHERE UserId = @UserId AND PathId = @PathId
+    ELSE
+        INSERT INTO dbo.aspnet_PersonalizationPerUser(UserId, PathId, PageSettings, LastUpdatedDate) VALUES (@UserId, @PathId, @PageSettings, @CurrentTimeUtc)
+    RETURN 0
+END
+GO
+
+/*************************************************************/
+/* Personalization Administration                            */
+/*************************************************************/
+
+IF (EXISTS (SELECT name
+              FROM sysobjects
+             WHERE (name = N'aspnet_PersonalizationAdministration_DeleteAllState')
+               AND (type = 'P')))
+DROP PROCEDURE dbo.aspnet_PersonalizationAdministration_DeleteAllState
+GO
+CREATE PROCEDURE dbo.aspnet_PersonalizationAdministration_DeleteAllState (
+    @AllUsersScope bit,
+    @ApplicationName NVARCHAR(256),
+    @Count int OUT)
+AS
+BEGIN
+    DECLARE @ApplicationId UNIQUEIDENTIFIER
+    EXEC dbo.aspnet_Personalization_GetApplicationId @ApplicationName, @ApplicationId OUTPUT
+    IF (@ApplicationId IS NULL)
+        SELECT @Count = 0
+    ELSE
+    BEGIN
+        IF (@AllUsersScope = 1)
+            DELETE FROM aspnet_PersonalizationAllUsers
+            WHERE PathId IN
+               (SELECT Paths.PathId
+                FROM dbo.aspnet_Paths Paths
+                WHERE Paths.ApplicationId = @ApplicationId)
+        ELSE
+            DELETE FROM aspnet_PersonalizationPerUser
+            WHERE PathId IN
+               (SELECT Paths.PathId
+                FROM dbo.aspnet_Paths Paths
+                WHERE Paths.ApplicationId = @ApplicationId)
+
+        SELECT @Coâ6­ € €unt = @@ROWCOUNT
+    END
+END
+GO
+
+/*************************************************************/
+IF (EXISTS (SELECT name
+              FROM sysobjects
+             WHERE (name = N'aspnet_PersonalizationAdministration_ResetSharedState')
+               AND (type = 'P')))
+DROP PROCEDURE dbo.aspnet_PersonalizationAdministration_ResetSharedState
+GO
+CREATE PROCEDURE dbo.aspnet_PersonalizationAdministration_ResetSharedState (
+    @Count int OUT,
+    @ApplicationName NVARCHAR(256),
+    @Path NVARCHAR(256))
+AS
+BEGIN
+    DECLARE @ApplicationId UNIQUEIDENTIFIER
+    EXEC dbo.aspnet_Personalization_GetApplicationId @ApplicationName, @ApplicationId OUTPUT
+    IF (@ApplicationId IS NULL)
+        SELECT @Count = 0
+    ELSE
+    BEGIN
+        DELETE FROM dbo.aspnet_PersonalizationAllUsers
+        WHERE PathId IN
+            (SELECT AllUsers.PathId
+             FROM dbo.aspnet_PersonalizationAllUsers AllUsers, dbo.aspnet_Paths Paths
+             WHERE Paths.ApplicationId = @ApplicationId
+                   AND AllUsers.PathId = Paths.PathId
+                   AND Paths.LoweredPath = LOWER(@Path))
+
+        SELECT @Count = @@ROWCOUNT
+    END
+END
+GO
+
+/*************************************************************/
+IF (EXISTS (SELECT name
+              FROM sysobjects
+             WHERE (name = N'aspnet_PersonalizationAdministration_ResetUserState')
+               AND (type = 'P')))
+DROP PROCEDURE dbo.aspnet_PersonalizationAdministration_ResetUserState
+GO
+CREATE PROCEDURE dbo.aspnet_PersonalizationAdministration_ResetUserState (
+    @Count                  int                 OUT,
+    @ApplicationName        NVARCHAR(256),
+    @InactiveSinceDate      DATETIME            = NULL,
+    @UserName               NVARCHAR(256)       = NULL,
+    @Path                   NVARCHAR(256)       = NULL)
+AS
+BEGIN
+    DECLARE @ApplicationId UNIQUEIDENTIFIER
+    EXEC dbo.aspnet_Personalization_GetApplicationId @ApplicationName, @ApplicationId OUTPUT
+    IF (@ApplicationId IS NULL)
+        SELECT @Count = 0
+    ELSE
+    BEGIN
+        DELETE FROM dbo.aspnet_PersonalizationPerUser
+        WHERE Id IN (SELECT PerUser.Id
+                     FROM dbo.aspnet_PersonalizationPerUser PerUser, dbo.aspnet_Users Users, dbo.aspnet_Paths Paths
+                     WHERE Paths.ApplicationId = @ApplicationId
+                           AND PerUser.UserId = Users.UserId
+                           AND PerUser.PathId = Paths.PathId
+                           AND (@InactiveSinceDate IS NULL OR Users.LastActivityDate <= @InactiveSinceDate)
+                           AND (@UserName IS NULL OR Users.LoweredUserName = LOWER(@UserName))
+                           AND (@Path IS NULL OR Paths.LoweredPath = LOWER(@Path)))
+
+        SELECT @Count = @@ROWCOUNT
+    END
+END
+GO
+
+/*************************************************************/
+IF (EXISTS (SELECT name
+              FROM sysobjects
+             WHERE (name = N'aspnet_PersonalizationAdministration_FindState')
+               AND (type = 'P')))
+DROP PROCEDURE dbo.aspnet_PersonalizationAdministration_FindState
+GO
+CREATE PROCEDURE dbo.aspnet_PersonalizationAdministration_FindState (
+    @AllUsersScope bit,
+    @ApplicationName NVARCHAR(256),
+    @PageIndex              INT,
+    @PageSize               INT,
+    @Path NVARCHAR(256) = NULL,
+    @UserName NVARCHAR(256) = NULL,
+    @InactiveSinceDate DATETIME = NULL)
+AS
+BEGIN
+    DECLARE @ApplicationId UNIQUEIDENTIFIER
+    EXEC dbo.aspnet_Personalization_GetApplicationId @ApplicationName, @ApplicationId OUTPUT
+    IF (@ApplicationId IS NULL)
+        RETURN
+
+    -- Set the page bounds
+    DECLARE @PageLowerBound INT
+    DECLARE @PageUpperBound INT
+    DECLARE @TotalRecords   INT
+    SET @PageLowerBound = @PageSize * @PageIndex
+    SET @PageUpperBound = @PageSize - 1 + @PageLowerBound
+
+    -- Create a temp table to store the selected results
+    CREATE TABLE #PageIndex (
+        IndexId int IDENTITY (0, 1) NOT NULL,
+        ItemId UNIQUEIDENTIFIER
+    )
+
+    IF (@AllUsersScope = 1)
+    BEGIN
+        -- Insert into our temp table
+        INSERT INTO #PageIndex (ItemId)
+        SELECT Paths.PathId
+        FROM dbo.aspnet_Paths Paths,
+             ((SELECT Paths.PathId
+               FROM dbo.aspnet_PersonalizationAllUsers AllUsers, dbo.aspnet_Paths Paths
+               WHERE Paths.ApplicationId = @ApplicationId
+                      AND AllUsers.PathId = Paths.PathId
+                      AND (@Path IS NULL OR Paths.LoweredPath LIKE LOWER(@Path))
+              ) AS SharedDataPerPath
+              FULL OUTER JOIN
+              (SELECT DISTINCT Paths.PathId
+               FROM dbo.aspnet_PersonalizationPerUser PerUser, dbo.aspnet_Paths Paths
+               WHERE Paths.ApplicationId = @ApplicationId
+                      AND PerUser.PathId = Paths.PathId
+                      AND (@Path IS NULL OR Paths.LoweredPath LIKE LOWER(@Path))
+              ) AS UserDataPerPath
+              ON SharedDataPerPath.PathId = UserDataPerPath.PathId
+             )
+        WHERE Paths.PathId = SharedDataPerPath.PathId OR Paths.PathId = UserDataPerPath.PathId
+        ORDER BY Paths.Path ASC
+
+        SELECT @TotalRecords = @@ROWCOUNT
+
+        SELECT Paths.Path,
+               SharedDataPerPath.LastUpdatedDate,
+               SharedDataPerPath.SharedDataLength,
+               UserDataPerPath.UserDataLength,
+               UserDataPerPath.UserCount
+        FROM dbo.aspnet_Paths Paths,
+             ((SELECT PageIndex.ItemId AS PathId,
+                      AllUsers.LastUpdatedDate AS LastUpdatedDate,
+                      DATALENGTH(AllUsers.PageSettings) AS SharedDataLength
+               FROM dbo.aspnet_PersonalizationAllUsers AllUsers, #PageIndex PageIndex
+               WHERE AllUsers.PathId = PageIndex.ItemId
+                     AND PageIndex.IndexId >= @PageLowerBound AND PageIndex.IndexId <= @PageUpperBound
+              ) AS SharedDataPerPath
+              FULL OUTER JOIN
+              (SELECT PageIndex.ItemId AS PathId,
+                      SUM(DATALENGTH(PerUser.PageSettings)) AS UserDataLength,
+                      COUNT(*) AS UserCount
+               FROM aspnet_PersonalizationPerUser PerUser, #PageIndex PageIndex
+               WHERE PerUser.PathId = PageIndex.ItemId
+                     AND PageIndex.IndexId >= @PageLowerBound AND PageIndex.IndexId <= @PageUpperBound
+               GROUP BY PageIndex.ItemId
+              ) AS UserDataPerPath
+              ON SharedDataPerPath.PathId = UserDataPerPath.PathId
+             )
+        WHERE Paths.PathId = SharedDataPerPath.PathId OR Paths.PathId = UserDataPerPath.PathId
+        ORDER BY Paths.Path ASC
+    END
+    ELSE
+    BEGIN
+        -- Insert into our temp table
+        INSERT INTO #PageIndex (ItemId)
+        SELECT PerUser.Id
+        FROM dbo.aspnet_PersonalizationPerUser PerUser, dbo.aspnet_Users Users, dbo.aspnet_Paths Paths
+        WHERE Paths.ApplicationId = @ApplicationId
+              AND PerUser.UserId = Users.UserId
+              AND PerUser.PathId = Paths.PathId
+              AND (@Path IS NULL OR Paths.LoweredPath LIKE LOWER(@Path))
+              AND (@UserName IS NULL OR Users.LoweredUserName LIKE LOWER(@UserName))
+              AND (@InactiveSinceDate IS NULL OR Users.LastActivityDate <= @InactiveSinceDate)
+        ORDER BY Paths.Path ASC, Users.UserName ASC
+
+        SELECT @TotalRecords = @@ROWCOUNT
+
+        SELECT Paths.Path, PerUser.LastUpdatedDate, DATALENGTH(PerUser.PageSettings), Users.UserName, Users.LastActivityDate
+        FROM dbo.aspnet_PersonalizationPerUser PerUser, dbo.aspnet_Users Users, dbo.aspnet_Paths Paths, #PageIndex PageIndex
+        WHERE PerUser.Id = PageIndex.ItemId
+              AND PerUser.UserId = Users.UserId
+              AND PerUser.PathId = Paths.PathId
+              AND PageIndex.IndexId >= @PageLowerBound AND PageIndex.IndexId <= @PageUpperBound
+        ORDER BY Paths.Path ASC, Users.UserName ASC
+    END
+
+    RETURN @TotalRecords
+END
+GO
+
+/*************************************************************/
+IF (EXISTS (SELECT name
+              FROM sysobjects
+             WHERE (name = N'aspnet_PersonalizationAdministration_GetCountOfState')
+               AND (type = 'P')))
+DROP PROCEDURE dbo.aspnet_PersonalizationAdministration_GetCountOfState
+GO
+CREATE PROCEDURE dbo.aspnet_PersonalizationAdministration_GetCountOfState (
+    @Count int OUT,
+    @AllUsersScope bit,
+    @ApplicationName NVARCHAR(256),
+    @Path NVARCHAR(256) = NULL,
+    @UserName NVARCHAR(256) = NULL,
+    @InactiveSinceDate DATETIME = NULL)
+AS
+BEGIN
+
+    DECLARE @ApplicationId UNIQUEIDENTIFIER
+    EXEC dbo.aspnet_Personalization_GetApplicationId @ApplicationName, @ApplicationId OUTPUT
+    IF (@ApplicationId IS NULL)
+        SELECT @Count = 0
+    ELSE
+        IF (@AllUsersScope = 1)
+            SELECT @Count = COUNT(*)
+            FROM dbo.aspnet_PersonalizationAllUsers AllUsers, dbo.aspnet_Paths Paths
+            WHERE Paths.ApplicationId = @ApplicationId
+                  AND AllUse

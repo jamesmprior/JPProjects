@@ -1,0 +1,295 @@
+/*
+Theme Name: B&B - Bed&Breakfast Responsive site template
+Theme URI: http://www.ansonika.com/bed-and-breakfast/
+Description:  Bed&Breakfast Responsive site template is created by <a href="http://www.ansonika.com">Ansonika</a>.
+Version: 1.0.0
+Author: Ansonika
+Author URI: http://themeforest.net/user/Ansonika/
+--------------------------------------------------------*/
+
+
+/* #Reset & Basics (Inspired by E. Meyers)
+================================================== */
+html, body { height: 100%;}
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{ border:0; font:inherit; font-size:100%; margin:0; padding:0; vertical-align:baseline;}
+article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{ display:block;}
+body{ line-height:1;}
+ol,ul{ list-style:none;}
+blockquote,q{ quotes:none;}
+blockquote:before,blockquote:after,q:before,q:after{ content:''; content:none;}
+table{ border-collapse:collapse; border-spacing:0; width:100%;}
+
+/*--------------------------------------------------------
+Typography
+--------------------------------------------------------*/
+
+body { background: white; font-family: 'Lato', sans-serif; font-size:13px; color: #464646; line-height:18px; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%;}
+
+p{ margin:0 0 15px 0;}
+p img{ margin:0;}
+strong { font-weight:bold;}
+
+h1 a,h2 a,h3 a,h4 a,h5 a,h6 a{ font-weight:inherit;}
+h1, h2, h3, h4, h5{ line-height:normal}
+
+h1, h2{ font-weight:900;}
+h3, h4{ font-weight:700;}
+
+h1{font-size:60px; text-transform:uppercase;  color:#fff; text-shadow: 0 1px rgba(000, 000, 000, .45);}
+h2 {font-size:50px; text-transform:uppercase; line-height:50px; text-shadow: 0 1px rgba(000, 000, 000, .45);}
+
+#intro-txt h2 {font-weight:400;font-size:42px; line-height:42px; text-transform:none; font-family: 'Yellowtail', cursive; margin-bottom:20px; border-bottom:3px double #fff; padding-bottom:10px;}
+#intro-txt p { font-size:18px; }
+
+.section-title {text-align:center;  color:#fff;text-shadow: 0px 1px 1px #000;  font-family: 'Yellowtail', cursive;}
+.section-title h2 { text-transform:none; font-size:110px; font-weight:normal; margin-bottom:45px; }
+.section-title p {font-size:28px;margin-bottom:30px} 
+.section-title p strong{ color: #FF9; font-size:32px}
+.section-title.gallery h2 { margin-top:30px; line-height:80px;}
+
+.section-title-2 {text-align:center; padding:45px 0;margin-bottom:60px;background:#51a4c4 url(../images/bg-2.jpg) repeat-x center bottom; text-shadow: 0 1px rgba(000, 000, 000, .45);}
+.section-title-2 h2 {color:#fff; font-size:42px; }
+.section-title-2 p {font-size:30px; color:#cbf1ff; margin-bottom:0;font-family: 'Yellowtail', cursive;}
+
+.section-title-3 {text-align:center; margin-bottom:30px}
+.section-title-3 h3 { font-size:28px; text-transform:uppercase;margin-bottom:5px;  }
+.section-title-3 p {font-size:20px; color:#b0b0b0; margin-bottom:0;}
+
+h3 { font-size:22px; margin:0 0 10px 0;}
+h3 span { display:block; font-size:16px; color:#a0a0a0; margin-top:-2px; font-weight:normal; font-size:18px;}
+.item h3, #rooms article h3,  #activities article h3 { font-size:22px; color:#51a4c4; }
+.item h3 span  {font-size:16px; color:#a9a9a9; display:block; margin-top:-2px;}
+
+h4 { font-size:18px; margin:0 0 10px 0; padding:0; }
+h4.add-info{ background:url(../images/icon-info.png) no-repeat center left; padding-left:25px;}
+h4.rules{ background: url(../images/rules.png) no-repeat center left; padding-left:25px;}
+h4.payments{ background: url(../images/icon-paymnets.png) no-repeat center left; padding-left:18px;}
+h4.tours { font-size:22px; background:url(../images/tour-icon.png) center left no-repeat; padding-left:37px; height:30px; line-height:43px; width:89%; padding-bottom:10px;}
+h4#directions{ background: url(../images/map.png) no-repeat top left; padding-left:40px; margin-bottom:10px; padding-top:3px;}
+h4#directions span{ font-weight:normal; font-style:italic; font-size:11px; display: block; color:#999; margin-top:2px;}
+#main-facilties .four.columns h4{ font-size:14px; color:#999}
+
+
+ 
+/* #Links================================================== */
+a { color:#39bad2; outline:0; text-decoration:none;}
+a:hover { text-decoration:underline;}
+
+/* #Images================================================== */
+img.scale-with-grid {max-width:100%; height: auto;}
+
+/* buttons */
+a.button_enter {
+	background:#8dc63f url(../images/arrow-down.png) no-repeat 10px center;
+	color:#fff;
+	font-size:20px;
+	padding:12px 25px 12px 55px;
+	margin-right:5px;
+	display:inline-block;
+	text-decoration:none;
+	transition: background .5s ease;
+	margin-bottom:0;
+	box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.30);
+}
+/* buttons */
+a:hover.button_enter {
+	background: #3CF url(../images/arrow-down.png) no-repeat 10px center;
+}
+
+a.button_check{
+	background:#8dc63f url(../images/calendar-1.png) no-repeat 10px center;
+	color:#fff;
+	font-size:20px;
+	padding:12px 25px 12px 55px;
+	margin-left:5px;
+	display:inline-block;
+	text-decoration:none;
+	transition: background .5s ease;
+	margin-bottom:0;
+	box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.30);
+}
+a:hover.button_check {
+	background: #3CF url(../images/calendar-1.png) no-repeat 10px center;
+}
+a.scroll_a  {background: url(../images/back-to-top.png); width:102px; height:41px; position:absolute; top:0; left:50%; z-index:999;  text-indent:-9999px; margin-left:-51px; }
+
+a.button_3, .button_3{border:none;background:#8dc63f;color:#fff;font-size:14px;padding:8px 12px;margin-top:20px; text-decoration:none; transition: background .5s ease; display:inline-block; margin-bottom:30px; cursor:pointer; }
+.button_3:hover {background:#333;}
+
+a.button_4, .button_4{border:none;background:#8dc63f ;color:#fff;font-size:12px;padding:7px  12px ;margin-top:10px; text-decoration:none; transition: background .5s ease; display:inline-block; margin-bottom:20px;cursor:pointer;}
+.button_4:hover {background:#333;}
+
+/* #Tabs (activate in tabs.js)
+================================================== */
+	/* #Tabs (activate in tabs.js)
+================================================== */
+	ul.tabs {
+		display: block;
+		margin: 0 0 0 0;
+		padding: 0;
+		border-bottom: solid 1px #ddd; }
+	ul.tabs li {
+		display: block;
+		width: auto;
+		height: 30px;
+		padding: 0;
+		float: left;
+		margin-bottom: 0; }
+	ul.tabs li a {
+		display: block;
+		text-decoration: none;
+		width: auto;
+		font-weight:700;
+		text-transform:uppercase;
+		height: 29px;
+		padding: 0px 20px;
+		line-height: 30px;
+		border: solid 1px #ddd;
+		border-width: 1px 1px 0 0;
+		margin: 0;
+		background: #f5f5f5;
+		font-size: 13px; }
+	ul.tabs li a.active {
+		background: #fff;
+		height: 30px;
+		position: relative;
+		top: -4px;
+		padding-top: 4px;
+		border-left-width: 1px;
+		margin: 0 0 0 -1px;
+		color: #111;
+		border-top-left-radius: 2px;
+		border-top-right-radius: 2px; }
+	ul.tabs li:first-child a.active {
+		margin-left: 0; }
+	ul.tabs li:first-child a {
+		border-width: 1px 1px 0 1px;
+		border-top-left-radius: 2px; }
+	ul.tabs li:last-child a {
+		border-top-right-radius: 2px; }
+
+	ul.tabs-content { margin: 0; display: block; border:1px solid #ddd; border-top:none; padding:20px; }
+	ul.tabs-content.contact { padding:35px 10px 15px 55px; }
+	ul.tabs-content > li { display:none; }
+	ul.tabs-content > li.active { display: block; }
+
+	/* Clearfixing tabs for beautiful stacking */
+	ul.tabs:before,
+	ul.tabs:after {
+	  content: '\0020';
+	  display: block;
+	  overflow: hidden;
+	  visibility: hidden;
+	  width: 0;
+	  height: 0; }
+	ul.tabs:after {
+	  clear: both; }
+	ul.tabs {
+	  zoom: 1; }
+
+hr{ border: double #e5e5e5; border-width:3px 0 0; clear:both; height:0; margin: 15px 10px 30px 10px }
+
+/* Fix for odd Mozilla border & padding issues */
+button::-moz-focus-inner,input::-moz-focus-inner {border:0;padding: 0;}
+
+/* Forms====================================== */ 
+fieldset { margin-bottom:15px; display:block; width:100%}
+input[type="text"],input[type="password"],input[type="email"],textarea,select{ background:#fff; border:3px solid #e6e6e6; border-radius:2px; color:#777; display:block; font:13px "HelveticaNeue","Helvetica Neue",Helvetica,Arial,sans-serif; margin:0; margin-bottom:10px; outline:none; padding:8px;width:90%;  box-shadow:0 0 10px #eee inset;}
+select{ padding:8px; width:97%; -webkit-appearance:none }
+input[type="text"]:focus,input[type="password"]:focus,input[type="email"]:focus,textarea:focus{ border:3px solid #ccc;  border-radius:3px; box-shadow:0 0 3px rgba(0,0,0,.2); color:#444; }
+textarea{ min-height:60px; width:88%;}
+label,legend{ display:block; font-size:13px; font-weight:bold; color:#888}
+
+input[type="text"].error, input[type="email"].error, textarea.error{ box-shadow:0 0 5px rgba(255,51,51,0.5); -moz-box-shadow:0 0 5px rgba(255,51,51,0.5); -webkit-box-shadow:0 0 5px rgba(255,51,51,0.5);}
+label.error{ color:#ff3333; display:block; font-size:11px; height:15px; margin:0 0 10px 0; padding:0; z-index:9999; font-weight:normal;}
+
+#availability-form span, #contact-form span  { float:left; width:45%; display:block; margin-right:15px;}
+#contact-form label#text-box  { float:none; width:100%;}
+input.calendar { background:url(../images/calendar-3.png) no-repeat center right;}
+
+.remove-bottom{ margin-bottom:0 !important;}
+.half-bottom{ margin-bottom:10px !important;}
+.add-bottom{ margin-bottom:15px !important;}
+.add-bottom_2{ margin-bottom:30px !important;}
+.add-bottom_3{ margin-bottom:40px !important;}
+.add-top{ margin-top:100px !important;}
+
+/* Tool Tips ====================================== */ 
+.tip-twitter{ background-color:#000; border-radius:4px; color:#fff; max-width:200px; opacity:0.8; padding:8px 8px; text-align:left; z-index:1000;}
+.tip-twitter .tip-inner{ font:11px/14px Helvetica Neue,Helvetica,Arial,sans-serif;}
+.tip-twitter .tip-arrow-top{ background:url(../images/tip-twitter_arrows.gif) no-repeat; height:5px; left:50%; margin-left:-5px; margin-top:-5px; top:0; width:9px;}
+.tip-twitter .tip-arrow-right{ background:url(../images/tip-twitter_arrows.gif) no-repeat -9px 0; height:9px; left:100%; margin-left:0; margin-top:-4px; top:50%; width:5px;}
+.tip-twitter .tip-arrow-bottom{ background:url(../images/tip-twitter_arrows.gif) no-repeat -18px 0; height:5px; left:50%; margin-left:-5px; margin-top:0; top:100%; width:9px;}
+.tip-twitter .tip-arrow-left{ background:url(../images/tip-twitter_arrows.gif) no-repeat -27px 0; height:9px; left:0; margin-left:-5px; margin-top:-4px; top:50%; width:5px;}
+
+
+/*  MEDIA QUERIES (responsive styles)
+================================================== */
+
+/* Tablet Portrait size to standard 960 (devices and browsers) ================================== */
+@media only screen and (min-width: 768px) and (max-width: 959px) {
+#intro-txt h1 {font-size:50px; }
+#intro-txt h2 {font-size:32px; }
+select{width:100%;  }
+
+ul.tabs-content.contact { padding:20px 0 15px 35px; }
+.section-title.gallery h2 { margin-top:0; line-height:80px;}
+
+}
+
+/* Mobile Landscape Size to Tablet Portrait (devices and browsers) */
+@media only screen and (min-width: 480px) and (max-width: 767px) {
+
+#intro-txt h1 {font-size:28px;  padding:0; border-bottom:3px double #fff; padding-bottom:5px;}
+#intro-txt h2 { display:none;}
+
+#rooms article h3 { margin-top:10px;}
+.section-title.gallery h2 { margin-top:0;}
+
+/* buttons */
+a.button_enter, a.button_check {background:#8dc63f ; font-size:14px; padding:5px 10px; margin-top:30px;}
+a:hover.button_enter, a:hover.button_check {background: #3CF;}
+
+.section-title h2 { font-size:40px; margin-bottom:15px; }
+.section-title p {font-size:20px; line-height:20px;}
+
+.section-title-2 { padding:20px 0; margin-bottom:30px}
+.section-title-2 h2 { font-size:28px; line-height:28px;  }
+.section-title-2 p {font-size:20px; line-height:20px;}
+
+.section-title-3 h3 { font-size:24px; margin-bottom:0px;  }
+.section-title-3 p {font-size:20px; }
+
+ul.tabs-content.contact { padding:20px 20px 0 35px; }
+select{width:100%;  }
+
+hr{  margin: 15px 0px 30px 0px }
+}
+
+
+/* Mobile Portrait Size to Mobile Landscape Size (devices and browsers) */
+@media only screen and (max-width: 479px) {
+/* buttons */
+a.button_enter, a.button_check {background:#8dc63f ; font-size:14px; padding:8px 10px;  display:block; margin:0; margin-bottom:10px;}
+a:hover.button_enter, a:hover.button_check {background: #3CF;}
+
+.section-title h2 { font-size:40px; margin-bottom:15px;  }
+.section-title p {font-size:20px; line-height:20px;}
+.section-title.gallery h2 { margin-top:0;}
+
+.section-title-2 { padding:20px 0; margin-bottom:30px}
+.section-title-2 h2 { font-size:28px; line-height:28px;  }
+.section-title-2 p {font-size:20px; line-height:20px;}
+
+.section-title-3 h3 { font-size:24px; margin-bottom:0px;  }
+.section-title-3 p {font-size:20px; }
+
+#intro-txt h1 {font-size:30px; margin-bottom:50px; line-height:30px;}
+#intro-txt h2 { display:none;}
+#availability-form span, #contact-form span  { float:none; width:100%; display:block; margin-left:2px;}
+#rooms article h3 { margin-top:10px;}
+select{ padding:8px; width:97%;  }
+ul.tabs li a {width: auto; height: 29px; padding: 0px 10px; font-size: 11px; }
+ul.tabs-content.contact { padding:20px; }
+hr{  margin: 15px 0px 30px 0px }
+}

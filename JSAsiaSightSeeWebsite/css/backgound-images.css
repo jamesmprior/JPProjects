@@ -1,0 +1,74 @@
+/*--------------------------------------------------------
+containers
+--------------------------------------------------------*/
+.border-top {background:url(../images/border-top.png) repeat-x top left; width:100%; height:10px; position:absolute; top:0; left:0; z-index:99; display:block}
+#bg-container-2, #bg-container-3,#bg-container-4 {background: #111;position: relative; overflow: hidden; width: 100%;  }
+#bg-container-2 .container, #bg-container-3 .container, #bg-container-4 .container { padding:100px 0 60px 0; }
+
+.ie8 .bg2, .ie8 .bg3, .ie8 .bg4, .ie9 .bg2, .ie9 .bg3, .ie9 .bg4  {-ms-behavior: url(backgroundsize.min.htc);background-size: cover; }
+
+/*Background2------------------------------------------*/
+.bg2 {
+	 background: url(../images/bg/bg-2.jpg) 50% 50% fixed repeat-y;
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    position: absolute;
+    background-size: 100%;
+	box-shadow: inset 0px 0px 20px rgba(0, 0, 0, 0.8);	
+}
+
+/*Background3------------------------------------------*/
+.bg3 {
+    background: url(../images/bg/bg-3.jpg) 50% 20% fixed repeat-y;
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    position: absolute;
+    background-size: 100%;
+	box-shadow: inset 0px 0px 20px rgba(0, 0, 0, 1);
+}
+
+/*Background3------------------------------------------*/
+.bg4 {
+    background: url(../images/bg/bg-4.jpg) 50% 50% fixed repeat-y;
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    position: absolute;
+    background-size: 100%;
+	box-shadow: inset 0px 0px 20px rgba(0, 0, 0, 0.8);
+}
+
+/* MEDIA QUERIES (responsive styles)
+================================================== */
+
+/* Tablet Portrait size to standard 960 (devices and browsers) ================================== */
+@media only screen and (min-width: 768px) and (max-width: 959px) {
+	
+#bg-container-2 .container, #bg-container-3 .container, #bg-container-4 .container { padding:80px 0 50px 0; }
+.bg2 {background: url(../images/bg/bg-2.jpg) top center repeat-y scroll;background-size: 108%;}
+.bg3 { background: url(../images/bg/bg-3.jpg) top center repeat-y scroll;background-size: 120%;}
+.bg4 {background-size: 110%;}
+}
+
+
+/* Mobile Landscape Size to Tablet Portrait (devices and browsers) */
+@media only screen and (min-width: 480px) and (max-width: 767px) {
+
+#bg-container-2 .container, #bg-container-3 .container, #bg-container-4 .container { padding:60px 0 30px 0; }
+.bg2 {background: url(../images/bg/bg-2.jpg) top center scroll no-repeat;}
+.bg3 { background: url(../images/bg/bg-3.jpg) top center scroll no-repeat; }
+.bg4 {    background: url(../images/bg/bg-4.jpg) top center scroll no-repeat;}
+}
+
+/* Mobile Portrait Size to Mobile Landscape Size (devices and browsers) */
+@media only screen and (max-width: 479px) {
+#bg-container-2 .container, #bg-container-3 .container, #bg-container-4 .container { padding:60px 0 30px 0; }
+.bg2 {background: url(../images/bg/bg-2.jpg) top center scroll no-repeat;background-size:200%;}
+.bg3 { background: url(../images/bg/bg-3.jpg) top center scroll no-repeat; background-size:230%;}
+.bg4 {    background: url(../images/bg/bg-4.jpg) top center scroll no-repeat; background-size:140% }
+
+}
+
+

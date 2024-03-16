@@ -1,0 +1,21 @@
+[OK]:creating scoreboard for game name...
+[OK]:created scoreboard directory for game name!
+[OK]:created scoreboard player data files for game name!
+[OK]:created scoreboard game key for game name!
+
+
+Scoreboard for Bolt Action has been successfully created
+and may be viewed using the following URL:
+
+    http://www.geeksanon.com/scoreboard/scoreboard.php?gamename=Bolt Action
+
+The following information will be required to submit new scores to this scoreboard
+or if you want to delete this scoreboard in the future:
+
+    Game Name = Bolt Action
+    Game Key = e8b14104c79c6038b54b1bb6db24c25b
+
+Please remember to keep this information in a safe place!
+
+
+Thank You And Enjoy!

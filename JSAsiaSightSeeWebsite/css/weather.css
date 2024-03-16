@@ -1,0 +1,62 @@
+﻿.weatherItem {
+	padding: 0.8em;
+	text-align: left;
+}
+.weatherCity { text-transform: uppercase; }
+.weatherTemp {
+	font-size: 2.8em;
+	font-weight: bold;
+	margin:10px 0;
+}
+.weatherDesc, .weatherCity, .weatherForecastDay  { font-weight: bold; }
+.weatherDesc { margin-bottom: 0.4em; }
+.weatherRange, .weatherWind, .weatherLink, .weatherForecastItem { font-size:12px;}
+.weatherLink, .weatherForecastItem {
+	margin-bottom: 0.5em;
+	text-align: left;
+}
+.weatherLink a {
+	display:block;
+	clear:both;
+	padding-top:10px;
+}
+.weatherForecastItem {
+	padding: 10px 10px 10px 80px;
+	background-position: left center;
+	width:100%;
+	border: 1px solid #ededed;
+	background-color:#fff;
+}
+.weatherForecastDay { font-size:14px; display:inline; margin-right:5px;}
+
+.odd { }
+.even { background-color: #d4d4e8; }
+
+.weatherItem.odd { float:left; width:210px; padding-left:250px; background-color:#f4fafe; margin-right:20px; border:1px solid#daf0fb;margin-bottom:15px; }
+.weatherForecast{float:left; width:365px }
+
+.weatherForecastDate, .weatherForecastText, .weatherForecastRange{ display:inline; margin-right:15px; }
+
+/* Tablet Portrait size to standard 960 (devices and browsers) ================================== */
+@media only screen and (min-width: 768px) and (max-width: 959px) {
+.weatherItem.odd { width:120px; padding-left:170px; margin-right:10px;}
+.weatherForecast{width:340px }	
+.weatherForecastItem {padding: 10px 10px 10px 72px;}
+#weather { margin:auto; width:740px;}
+}
+
+/* Mobile Landscape Size to Tablet Portrait (devices and browsers) */
+@media only screen and (min-width: 480px) and (max-width: 767px) {
+.weatherForecast{width:320px }	
+.weatherForecastRange{ display:block; }
+
+.weatherItem.odd { float:left; width:150px; padding-left:250px; margin-right:0;}
+
+}
+/* Mobile Portrait Size to Mobile Landscape Size (devices and browsers) */
+@media only screen and (max-width: 479px) {
+.weatherForecast{width:205px }	
+.weatherForecastText, .weatherForecastRange{ display:block; }
+.weatherItem.odd {width:115px; padding-left:170px;margin-right:0; }
+
+}
